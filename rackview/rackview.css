@@ -1,0 +1,29 @@
+svg {
+	background: #aaaaaa;
+	padding: 10pt;
+}
+
+.rack {
+}
+
+.rack rect {
+	stroke:black;
+	stroke-width: 1;
+	fill: white;
+}
+
+.rack .rack_number {
+	font: 7px arial, sans-serif;
+	text-anchor: middle;
+	dominant-baseline: middle;
+}
+
+.machine rect {
+	fill: #aaaaff;
+}
+
+.machine text {
+	font: 8px arial, sans-serif;
+	text-anchor: middle;
+	dominant-baseline: middle;
+}
