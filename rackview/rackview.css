@@ -1,14 +1,13 @@
 svg {
 	background: #aaaaaa;
-	padding: 10pt;
 }
 
 .rack {
 }
 
 .rack rect {
-	stroke:black;
-	stroke-width: 1;
+	stroke: black;
+	stroke-width: 0.5;
 	fill: white;
 }
 

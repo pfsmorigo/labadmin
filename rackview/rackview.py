@@ -9,6 +9,7 @@ filename = os.path.basename(sys.argv[0]).split('.')[0]
 
 unit_size = 10
 rack_width = 150
+border_size = unit_size
 
 rack_base_width = rack_width+(unit_size*2)
 rack_base_height = unit_size
@@ -24,13 +25,13 @@ if len(sys.argv) == 2:
     rack_total = rack_info[0][0]
     rack_max_size = rack_info[0][1]
 
-    width = (rack_base_width+(unit_size*2))*rack_total
-    height = (rack_max_size*unit_size)+rack_base_height+(unit_size*2)
+    width = ((rack_base_width+unit_size)*rack_total)-unit_size+(border_size*2)
+    height = (rack_max_size*unit_size)+rack_base_height+(unit_size*2)+(border_size*2)
 
     dwg = svgwrite.Drawing(filename = filename+".svg", size = (width, height))
     dwg.add_stylesheet(filename+".css", title = filename)
 
-    shift = 0
+    shift = border_size
 
     cursor_rack.execute("SELECT * FROM rack")
     rack_rows = cursor_rack.fetchall()
@@ -40,13 +41,13 @@ if len(sys.argv) == 2:
         rack_height = ((rack_size*unit_size)+20)
 
         rack = dwg.g(class_="rack")
-        rack.add(dwg.rect(insert = (shift, height-unit_size),
+        rack.add(dwg.rect(insert = (shift, height-unit_size-border_size),
                           size = (rack_base_width, rack_base_height)))
-        rack.add(dwg.rect(insert = (shift+unit_size, height-rack_height-unit_size),
+        rack.add(dwg.rect(insert = (shift+unit_size, height-rack_height-unit_size-border_size),
                           size = (rack_width, rack_height)))
 
         for current_u in range(0, rack_size):
-            rack_num_pos = height-rack_height-unit_size+((rack_size-current_u)*unit_size)
+            rack_num_pos = height-rack_height-border_size-unit_size+((rack_size-current_u)*unit_size)
             rack.add(dwg.rect(insert = (shift+(unit_size*2), rack_num_pos),
                               size = (u_width, unit_size)))
             rack.add(dwg.text(current_u+1, insert = (shift+unit_size+(unit_size/2),
@@ -58,7 +59,7 @@ if len(sys.argv) == 2:
         for machine_row in machine_rows:
             machine_name = machine_row[0]
             machine_size = machine_row[2]*u_height
-            machine_base = rack_height-rack_base_height-((machine_row[1]-1)*u_height)
+            machine_base = rack_height-rack_base_height+border_size-((machine_row[1]-1)*u_height)
 
             print "%15s | %15s: %4.1f (%5.1f) %4.1f (%5.1f)" % (rack_name, machine_name, machine_row[1], machine_base, machine_row[2], machine_size)
 
@@ -70,7 +71,7 @@ if len(sys.argv) == 2:
                                            machine_base-(machine_size/2))))
             rack.add(machine)
         dwg.add(rack)
-        shift += rack_base_width
+        shift += rack_base_width+unit_size
 
 #print(dwg.tostring())
 dwg.save()
