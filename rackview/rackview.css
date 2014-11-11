@@ -12,8 +12,8 @@ svg {
 	fill: white;
 }
 
-.rack .rack_number {
-	font: 7px arial, sans-serif;
+.rack text {
+	font: 6px arial, sans-serif;
 	text-anchor: middle;
 	dominant-baseline: middle;
 }
