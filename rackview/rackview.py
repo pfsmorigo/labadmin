@@ -34,7 +34,7 @@ if len(sys.argv) == 2:
 
     shift = border_size
 
-    cursor_rack.execute("SELECT * FROM rack")
+    cursor_rack.execute("SELECT * FROM rack ORDER BY sort")
     rack_rows = cursor_rack.fetchall()
     for rack_row in rack_rows:
         rack_name = rack_row[0]
