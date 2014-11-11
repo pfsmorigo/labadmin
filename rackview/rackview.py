@@ -9,6 +9,7 @@ filename = os.path.basename(sys.argv[0]).split('.')[0]
 
 unit_size = 10
 rack_width = 150
+title_size = 20
 border_size = unit_size
 
 rack_base_width = rack_width+(unit_size*2)
@@ -26,7 +27,7 @@ if len(sys.argv) == 2:
     rack_max_size = rack_info[0][1]
 
     width = ((rack_base_width+unit_size)*rack_total)-unit_size+(border_size*2)
-    height = (rack_max_size*unit_size)+rack_base_height+(unit_size*2)+(border_size*2)
+    height = title_size+(rack_max_size*unit_size)+rack_base_height+(unit_size*2)+(border_size*2)
 
     dwg = svgwrite.Drawing(filename = filename+".svg", size = (width, height))
     dwg.add_stylesheet(filename+".css", title = filename)
@@ -41,17 +42,29 @@ if len(sys.argv) == 2:
         rack_height = ((rack_size*unit_size)+20)
 
         rack = dwg.g(class_="rack")
-        rack.add(dwg.rect(insert = (shift, height-unit_size-border_size),
-                          size = (rack_base_width, rack_base_height)))
-        rack.add(dwg.rect(insert = (shift+unit_size, height-rack_height-unit_size-border_size),
-                          size = (rack_width, rack_height)))
+        rack.add(dwg.text(rack_name,
+                          insert = (shift+(unit_size*2)+(u_width/2),
+                                    height-rack_height-(unit_size*2)-border_size),
+                          class_ = "name"))
+        rack.add(dwg.rect(insert = (shift+unit_size,
+                                    height-rack_height-unit_size-border_size),
+                          size = (rack_width, rack_height),
+                          class_ = "body"))
+        rack.add(dwg.rect(insert = (shift,
+                                    height-unit_size-border_size),
+                          size = (rack_base_width, rack_base_height),
+                          class_ = "base"))
 
         for current_u in range(0, rack_size):
             rack_num_pos = height-rack_height-border_size-unit_size+((rack_size-current_u)*unit_size)
-            rack.add(dwg.rect(insert = (shift+(unit_size*2), rack_num_pos),
-                              size = (u_width, unit_size)))
-            rack.add(dwg.text(current_u+1, insert = (shift+unit_size+(unit_size/2),
-                              rack_num_pos+(unit_size/2))))
+            rack.add(dwg.rect(insert = (shift+(unit_size*2),
+                                        rack_num_pos),
+                              size = (u_width, unit_size),
+                              class_ = "slot"))
+            rack.add(dwg.text(current_u+1,
+                              insert = (shift+unit_size+(unit_size/2),
+                                        rack_num_pos+(unit_size/2)),
+                              class_ = "slot_number"))
 
         cursor_machine = con.cursor()
         cursor_machine.execute("SELECT * FROM machine_list where rack = ?", [(rack_row[0])])
@@ -64,11 +77,14 @@ if len(sys.argv) == 2:
             print "%15s | %15s: %4.1f (%5.1f) %4.1f (%5.1f)" % (rack_name, machine_name, machine_row[1], machine_base, machine_row[2], machine_size)
 
             machine = dwg.g(class_="machine")
-            machine.add(dwg.rect(insert = (shift+(unit_size*2), machine_base-machine_size),
-                                 size = (u_width, machine_size)))
+            machine.add(dwg.rect(insert = (shift+(unit_size*2),
+                                           title_size+machine_base-machine_size),
+                                 size = (u_width, machine_size),
+                                 class_ = "body"))
             machine.add(dwg.text(machine_name,
                                  insert = (shift+(unit_size*2)+(u_width/2),
-                                           machine_base-(machine_size/2))))
+                                           title_size+machine_base-(machine_size/2)),
+                                 class_ = "title"))
             rack.add(machine)
         dwg.add(rack)
         shift += rack_base_width+unit_size

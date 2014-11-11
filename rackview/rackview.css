@@ -1,28 +1,36 @@
-svg {
-	background: #aaaaaa;
+.rack .name {
+	font: 12px sans-serif;
+	text-anchor: middle;
 }
 
-.rack {
-}
-
-.rack rect {
+.rack .body, .rack .base {
+	fill: #555;
+	stroke-width: 0.1;
 	stroke: black;
-	stroke-width: 0.5;
-	fill: white;
 }
 
-.rack text {
-	font: 6px arial, sans-serif;
+.rack .slot {
+	fill: #aaa;
+	stroke-width: 0.2;
+	stroke: black;
+}
+
+.rack .slot_number {
+	fill: #ccc;
+	font: 6px sans-serif;
 	text-anchor: middle;
 	dominant-baseline: middle;
 }
 
-.machine rect {
-	fill: #aaaaff;
+.machine .body {
+	fill: #fff;
+	stroke-width: 1;
+	stroke: black;
 }
 
-.machine text {
-	font: 8px arial, sans-serif;
+.machine .title {
+	fill: black;
+	font: 8px sans-serif;
 	text-anchor: middle;
 	dominant-baseline: middle;
 }
