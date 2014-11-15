@@ -3,13 +3,15 @@
 import sys
 import svgwrite
 import sqlite3 as sqlite
-import os.path
+import os
+import fileinput
+import re
 
-filename = os.path.basename(sys.argv[0]).split('.')[0]
+filename = os.path.dirname(os.path.realpath(__file__))+"/"+os.path.basename(sys.argv[0]).split('.')[0]
 
-unit_size = 10
-rack_width = 150
-title_size = 20
+unit_size = 15
+rack_width = unit_size*12
+rack_title_size = unit_size*2
 border_size = unit_size
 
 rack_base_width = rack_width+(unit_size*2)
@@ -27,10 +29,10 @@ if len(sys.argv) == 2:
     rack_max_size = rack_info[0][1]
 
     width = ((rack_base_width+unit_size)*rack_total)-unit_size+(border_size*2)
-    height = title_size+(rack_max_size*unit_size)+rack_base_height+(unit_size*2)+(border_size*2)
+    height = rack_title_size+(rack_max_size*unit_size)+rack_base_height+(unit_size*2)+(border_size*2)
 
     dwg = svgwrite.Drawing(filename = filename+".svg", size = (width, height))
-    dwg.add_stylesheet(filename+".css", title = filename)
+    #dwg.add_stylesheet(filename+".css", title = filename)
 
     shift = border_size
 
@@ -39,7 +41,7 @@ if len(sys.argv) == 2:
     for rack_row in rack_rows:
         rack_name = rack_row[0]
         rack_size = rack_row[1]
-        rack_height = ((rack_size*unit_size)+20)
+        rack_height = ((rack_size*unit_size)+(border_size*2))
 
         rack = dwg.g(class_="rack")
         rack.add(dwg.text(rack_name,
@@ -71,19 +73,27 @@ if len(sys.argv) == 2:
         machine_rows = cursor_machine.fetchall()
         for machine_row in machine_rows:
             machine_name = machine_row[0]
-            machine_size = machine_row[2]*u_height
-            machine_base = rack_height-rack_base_height+border_size-((machine_row[1]-1)*u_height)
+            machine_base = rack_title_size+border_size+rack_height-rack_base_height-((machine_row[1]-1)*u_height)
+            machine_baseh = machine_row[2]
+            machine_size = machine_row[3]*u_height
+            machine_hspace = machine_row[4]
+            machine_desc = str(machine_row[6])
+            machine_type = str(machine_row[7].split('-',1)[0])
+            machine_serial = str(machine_row[8])
 
             print "%15s | %15s: %4.1f (%5.1f) %4.1f (%5.1f)" % (rack_name, machine_name, machine_row[1], machine_base, machine_row[2], machine_size)
 
-            machine = dwg.g(class_="machine")
-            machine.add(dwg.rect(insert = (shift+(unit_size*2),
-                                           title_size+machine_base-machine_size),
-                                 size = (u_width, machine_size),
+            machine = dwg.a("/?serial="+machine_serial, target = "_parent", class_ = "machine")
+
+            base_horizontal = shift+(unit_size*2)+(u_width*machine_baseh)
+
+            machine.add(dwg.rect(insert = (base_horizontal,
+                                           machine_base-machine_size),
+                                 size = (u_width*machine_hspace, machine_size),
                                  class_ = "body"))
             machine.add(dwg.text(machine_name,
-                                 insert = (shift+(unit_size*2)+(u_width/2),
-                                           title_size+machine_base-(machine_size/2)),
+                                 insert = (base_horizontal+((u_width*machine_hspace)/2),
+                                           machine_base-(machine_size/2)),
                                  class_ = "title"))
             rack.add(machine)
         dwg.add(rack)
@@ -91,3 +101,18 @@ if len(sys.argv) == 2:
 
 #print(dwg.tostring())
 dwg.save()
+
+with open (filename+".svg", "r") as myfile:
+    svg_data=myfile.read()
+
+with open (filename+".css", "r") as myfile:
+    css_data=myfile.read()
+
+css_prefix="\n<style type=\"text/css\" >\n<![CDATA[\n"
+css_suffix="]]>\n</style>\n"
+
+i = svg_data.find("<defs />")
+
+output = open(filename+".svg", "w")
+output.write(svg_data[:i]+css_prefix+css_data+css_suffix+svg_data[i:])
+output.close()

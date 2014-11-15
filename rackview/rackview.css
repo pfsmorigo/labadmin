@@ -1,6 +1,7 @@
 .rack .name {
-	font: 12px sans-serif;
+	font: 16px sans-serif;
 	text-anchor: middle;
+	dominant-baseline: middle;
 }
 
 .rack .body, .rack .base {
@@ -17,20 +18,21 @@
 
 .rack .slot_number {
 	fill: #ccc;
-	font: 6px sans-serif;
+	font: 9px sans-serif;
 	text-anchor: middle;
 	dominant-baseline: middle;
 }
 
 .machine .body {
-	fill: #fff;
+	fill: #333;
 	stroke-width: 1;
-	stroke: black;
+	stroke: #111;
 }
 
 .machine .title {
-	fill: black;
-	font: 8px sans-serif;
+	fill: white;
+	font: 9px sans-serif;
 	text-anchor: middle;
 	dominant-baseline: middle;
 }
+
