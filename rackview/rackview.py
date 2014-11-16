@@ -36,7 +36,7 @@ if len(sys.argv) == 2:
 
     shift = border_size
 
-    cursor_rack.execute("SELECT * FROM rack ORDER BY sort")
+    cursor_rack.execute("SELECT name, size FROM rack ORDER BY sort")
     rack_rows = cursor_rack.fetchall()
     for rack_row in rack_rows:
         rack_name = rack_row[0]
@@ -69,23 +69,29 @@ if len(sys.argv) == 2:
                               class_ = "slot_number"))
 
         cursor_machine = con.cursor()
-        cursor_machine.execute("SELECT * FROM machine_list where rack = ?", [(rack_row[0])])
+        cursor_machine.execute("SELECT id, name, base, hbase, size, hspace, model_name, type_model, serial FROM machine_list WHERE rack = ?", [(rack_row[0])])
         machine_rows = cursor_machine.fetchall()
         for machine_row in machine_rows:
-            machine_name = machine_row[0]
-            machine_base = rack_title_size+border_size+rack_height-rack_base_height-((machine_row[1]-1)*u_height)
-            machine_baseh = machine_row[2]
-            machine_size = machine_row[3]*u_height
-            machine_hspace = machine_row[4]
-            machine_desc = str(machine_row[6])
+            machine_id = machine_row[0]
+            machine_name = machine_row[1]
+            machine_base = rack_title_size+border_size+rack_height-rack_base_height-((machine_row[2]-1)*u_height)
+            machine_hbase = machine_row[3]
+            machine_size = machine_row[4]*u_height
+            machine_hspace = machine_row[5]
+            machine_model_name = str(machine_row[6])
             machine_type = str(machine_row[7].split('-',1)[0])
             machine_serial = str(machine_row[8])
 
-            print "%15s | %15s: %4.1f (%5.1f) %4.1f (%5.1f)" % (rack_name, machine_name, machine_row[1], machine_base, machine_row[2], machine_size)
+            #print "%15s | %15s: %4.1f (%5.1f) %4.1f (%5.1f)" % (rack_name, machine_name, machine_row[1], machine_base, machine_row[2], machine_size)
 
-            machine = dwg.a("/?serial="+machine_serial, target = "_parent", class_ = "machine")
+            if machine_serial == "None":
+                url_view = "/id/"+str(machine_id)
+            else:
+                url_view = "/serial/"+machine_serial
 
-            base_horizontal = shift+(unit_size*2)+(u_width*machine_baseh)
+            machine = dwg.a(url_view, target = "_parent", class_ = "machine")
+
+            base_horizontal = shift+(unit_size*2)+(u_width*machine_hbase)
 
             machine.add(dwg.rect(insert = (base_horizontal,
                                            machine_base-machine_size),
@@ -116,3 +122,5 @@ i = svg_data.find("<defs />")
 output = open(filename+".svg", "w")
 output.write(svg_data[:i]+css_prefix+css_data+css_suffix+svg_data[i:])
 output.close()
+
+print filename+".svg generated."
