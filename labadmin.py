@@ -62,7 +62,7 @@ def rack_edit():
 
 def rack(view = ''):
     subprocess.call(["python", "rackview/rackview.py", sys.argv[1]])
-    rack_list = db.query("SELECT id, name, size, sort, used FROM rack_list").fetchall()
+    rack_list = db.query("SELECT * FROM rack_list").fetchall()
     rack_list.append(['new', '', '', '', ''])
     output = template('rack', info = info, view = view, rack_list = rack_list)
     return output
@@ -71,32 +71,34 @@ def rack(view = ''):
 def machine_edit():
     return machine()
 
-@route('/machine/by/model')
-def machine_edit():
-    return machine(sort = "model_name")
+@route('/machine/by_<sort>/edit')
+def machine_edit(sort):
+    return machine(view = 'edit', sort = sort)
 
-@route('/machine/by/serial')
-def machine_edit():
-    return machine(sort = "serial")
-
-@route('/machine/by/size')
-def machine_edit():
-    return machine(sort = "size")
-
-@route('/machine/by/rack')
-def machine_edit():
-    return machine(sort = "rack_name")
+@route('/machine/by_<sort>')
+def machine_edit(sort):
+    return machine(sort = sort)
 
 @route('/machine/edit')
 def machine_edit():
     return machine(view = 'edit')
 
-def machine(view = '', sort = ''):
+def machine(view = '', sort = 'name'):
     if sort:
-        sort = " ORDER BY "+sort
-    machine_list = db.query("SELECT id, name, model_id, model_name, type_model, size, serial, rack_id, rack_name, rack_del FROM machine_list"+sort).fetchall()
-    machine_list.append(['new', '', '', '', '', '', '', '', ''])
-    output = template('machine', info = info, view = view, machine_list = machine_list)
+        if sort == 'model':
+            sort_query = ' ORDER BY model_name'
+        elif sort == 'location':
+            sort_query = ' ORDER BY rack_id = 0, rack_sort, base DESC'
+        else:
+            sort_query = ' ORDER BY '+sort
+    machine_list = db.query("SELECT * FROM machine_list"+sort_query).fetchall()
+    machine_list.append(['new', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''])
+    rack_list = db.query("SELECT * FROM rack_list").fetchall()
+    machine_model_list = db.query("SELECT * FROM machine_model ORDER BY name").fetchall()
+    output = template('machine', info = info, view = view, sort = sort,
+                      machine_list = machine_list,
+                      rack_list = rack_list,
+                      machine_model_list = machine_model_list)
     return output
 
 @route('/', method='POST')

@@ -14,7 +14,7 @@ CREATE TABLE "machine" (
   "unit_value" REAL,
   "invoice"    TEXT,
   "cap_date"   DATETIME,
-  "rack"       INTEGER,
+  "rack"       INTEGER NOT NULL DEFAULT (0),
   "base"       REAL NOT NULL DEFAULT (0.0),
   "hbase"      REAL DEFAULT (0.0)
 );
@@ -45,34 +45,27 @@ DROP VIEW "machine_list";
 CREATE VIEW "machine_list" AS SELECT
   machine.id AS id,
   machine.name,
-  machine.base,
-  machine.hbase,
-  machine_model.size AS size,
-  machine_model.horizontal_space AS hspace,
   machine_model.id AS model_id,
   machine_model.name AS model_name,
   machine_model.type_model AS type_model,
+  machine_model.size AS size,
+  machine_model.horizontal_space AS hspace,
   machine.serial AS serial,
-  rack.id AS rack_id,
+  machine.unit_value AS unit_value,
+  machine.invoice AS invoice,
+  machine.cap_date AS cap_date,
+  machine.rack AS rack_id,
   rack.name AS rack_name,
-  rack.del AS rack_del
-FROM machine, machine_model, rack
-WHERE machine.rack = rack.rowid
+  rack.sort AS rack_sort,
+  rack.del AS rack_del,
+  machine.base,
+  machine.hbase
+FROM machine, machine_model
+LEFT OUTER JOIN rack
+WHERE (machine.rack IS 0 OR machine.rack = rack.rowid)
 AND machine.model = machine_model.rowid
+GROUP BY machine.id
 ORDER BY machine.name COLLATE NOCASE ASC;
-
-DROP VIEW "rack_list";
-CREATE VIEW "rack_list" AS SELECT
-  r.*,
-  SUM(mmm.used) AS used
-FROM (SELECT m.rack, MAX(mm.size) AS used
-      FROM machine m, machine_model mm
-      WHERE m.model = mm.rowid
-      GROUP BY rack, base) AS mmm, rack r
-WHERE r.rowid = mmm.rack
-AND r.del = 0
-GROUP BY r.name
-ORDER BY sort, name COLLATE NOCASE ASC;
 
 DROP VIEW "rack_list";
 CREATE VIEW "rack_list" AS SELECT
