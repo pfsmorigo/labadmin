@@ -1,3 +1,0 @@
-CREATE TABLE "machine" ("name" TEXT,"base" REAL DEFAULT (null) ,"size" REAL, "ip" TEXT, "rack" INTEGER);
-CREATE VIEW "machine_list" AS SELECT machine.name AS machine,machine.base,machine.size,rack.name AS rack FROM machine, rack WHERE machine.rack = rack.rowid ORDER BY rack.name,machine.base DESC;
-CREATE TABLE "rack" ("name" TEXT,"size" INTEGER,"sort" INTEGER DEFAULT (null) );

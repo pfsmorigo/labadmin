@@ -1,6 +1,6 @@
 body {
 	font-family: sans-serif;
-	padding: 0px;
+	padding: 10px;
 	margin: 0px;
 	text-align: center;
 }
@@ -15,35 +15,81 @@ a:hover {
 	text-decoration: underline;
 }
 
-#header,
-#footer {
-	background: #ddd;
-	border-bottom: 5px solid #ccc;
-	font-size: 15px;
-	padding: 10px;
-	text-align: left;
-}
+form .base       { width: 30px; }
+form .baseh      { width: 30px; }
+form .cap_date   { width: 80px; }
+form .invoice    { width: 80px; }
+form .name       { width: 120px; }
+form .serial     { width: 80px; }
+form .size       { width: 40px; }
+form .sort       { width: 40px; }
+form .unit_value { width: 80px; }
 
-#header #title,
-#footer #title {
-	display: inline;
-	float: right;
-	font-weight: bold;
+#header, #footer, #menu {
+	background: #ddd;
+	font-size: 15px;
+	padding: 10px 0px;
+	margin: 0px;
+	text-align: left;
 	font-variant: small-caps;
 }
 
-#header a {
-	background: #ccc;
+#header a, #menu a {
+	padding: 10px 15px;
 	display: inline;
-	padding: 10px 30px;
-	margin: 10px;
+	font-variant: small-caps;
+}
+
+#header .current, #menu .current {
+	font-weight: bold;
+}
+
+#header .current, #menu {
+	background: #bbb;
+}
+
+#menu {
+	margin-bottom: 30px;
+}
+
+#footer {
+	margin-top: 30px;
+}
+
+#details {
+	font-size: 12px;
+	margin-left: auto;
+	margin-right: auto;
+	padding: 30px;
+	text-align: left;
+}
+
+#details td,
+#details th,
+#details select,
+#details input {
+	font-size: 11px;
+	margin: 0px;
+	padding: 5px;
+}
+
+#details tr {
+	text-align: center;
+}
+
+#details input {
+	padding: 3px;
+}
+
+#details .new {
+	background: #ddd;
 }
 
 #machine_list
 {
 	border-collapse: collapse;
 	border-spacing: 0px;
-	font-size: 15px;
+	font-size: 13px;
 	margin-left: auto;
 	margin-right: auto;
 	text-align: left;
@@ -66,43 +112,12 @@ a:hover {
 	text-align: center;
 }
 
-.machine_details {
-	font-size: 12px;
-	margin-left: auto;
-	margin-right: auto;
-	text-align: left;
+#machine_list .deleted
+{
+	text-decoration: line-through;
+	color: #777;
 }
 
-.machine_details td,
-.machine_details th,
-.machine_details select,
-.machine_details input {
-	font-size: 11px;
-	margin: 0px;
-	padding: 5px;
-}
-
-.machine_details tr {
-	text-align: center;
-}
-
-.machine_details input {
-	padding: 3px;
-}
-
-.machine_details button {
-	margin: 10px;
-	padding: 10px;
-}
-
-.machine_details .name       { width: 120px; }
-.machine_details .base       { width: 30px; }
-.machine_details .baseh      { width: 30px; }
-.machine_details .cap_date   { width: 80px; }
-.machine_details .serial     { width: 80px; }
-.machine_details .unit_value { width: 80px; }
-.machine_details .invoice    { width: 80px; }
-
-#footer {
-	margin-top: 30px;
+#norack {
+	font-size: 25px;
 }
