@@ -92,7 +92,7 @@ def machine(view = '', sort = 'name'):
         else:
             sort_query = ' ORDER BY '+sort
     machine_list = db.query("SELECT * FROM machine_list"+sort_query).fetchall()
-    machine_list.append(['new', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''])
+    machine_list.append(['new', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''])
     rack_list = db.query("SELECT * FROM rack_list").fetchall()
     machine_model_list = db.query("SELECT * FROM machine_model ORDER BY name").fetchall()
     output = template('machine', info = info, view = view, sort = sort,
