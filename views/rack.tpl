@@ -21,7 +21,7 @@
 	%for rack in rack_list:
 				<tr{{!' class="new"' if rack[0] == 'new' else ''}}>
 		%if rack[0] != 'new':
-					<td><input type="checkbox" name="{{rack[0]}}_del" value="1"></td>
+					<td><input type="checkbox" name="{{rack[0]}}_state" value="2"></td>
 		%else:
 					<th>New</th>
 		%end

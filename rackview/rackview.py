@@ -73,7 +73,7 @@ if len(sys.argv) == 2:
                               class_ = "slot_number"))
 
         cursor_machine = con.cursor()
-        cursor_machine.execute("SELECT id, name, base, hbase, size, hspace, model_name, type_model, serial FROM machine_list WHERE rack_name = ?", [(rack_row[0])])
+        cursor_machine.execute("SELECT id, name, base, hbase, size, hspace, model_name, type_num, model_num, serial FROM machine_list WHERE rack_name = ?", [(rack_row[0])])
         machine_rows = cursor_machine.fetchall()
         for machine_row in machine_rows:
             machine_id = machine_row[0]
@@ -83,8 +83,9 @@ if len(sys.argv) == 2:
             machine_size = machine_row[4]*u_height
             machine_hspace = machine_row[5]
             machine_model_name = str(machine_row[6])
-            machine_type = str(machine_row[7].split('-',1)[0])
-            machine_serial = str(machine_row[8])
+            machine_type = str(machine_row[7])
+            machine_model = str(machine_row[8])
+            machine_serial = str(machine_row[9])
 
             #print "%15s | %15s: %4.1f (%5.1f) %4.1f (%5.1f)" % (rack_name, machine_name, machine_row[1], machine_base, machine_row[2], machine_size)
 

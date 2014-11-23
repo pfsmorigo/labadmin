@@ -77,7 +77,7 @@
 				<th><a href="/machine_by_invoice">Invoice{{!' &#9650;' if sort == 'invoice' else ''}}</a></th>
 				<th><a href="/machine_by_cap_date">Cap. Date{{!' &#9650;' if sort == 'cap_date' else ''}}</a></th>
 				<th><a href="/machine_by_size">Size{{!' &#9650;' if sort == 'size' else ''}}</a></th>
-				<th colspan="2"><a href="/machine_by_location">Location{{!' &#9650;' if sort == 'location' else ''}}</a></th>
+				<th colspan="2"><a href="/machine_by_location">Location{{!' &#9650;' if sort == '' else ''}}</a></th>
 			</tr>
 			%for machine in machine_list[:-1]:
 <%
