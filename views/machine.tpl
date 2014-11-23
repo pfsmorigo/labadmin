@@ -26,43 +26,41 @@
 					<th>H Base</th>
 				</tr>
 	%for machine in machine_list:
-			<tr{{!' class="new"' if machine[0] == 'new' else ''}}>
+				<tr{{!' class="new"' if machine[0] == 'new' else ''}}>
 		%if machine[0] != 'new':
-				<td><input type="checkbox" name="{{machine[0]}}_del" value="1"></td>
+					<td><input type="checkbox" name="{{machine[0]}}_del" value="1"></td>
 		%else:
-				<th>New</th>
+					<th>New</th>
 		%end
-				<td><input type="text" class="name" name="{{machine[0]}}_name" value="{{machine[1]}}" /></td>
-				<td>
-					<select class="model" name="{{machine[0]}}_model" form="machine">
+					<td><input type="text" class="name" name="{{machine[0]}}_name" value="{{machine[1]}}" /></td>
+					<td>
+						<select class="model" name="{{machine[0]}}_model" form="machine">
 		%for machine_model in machine_model_list:
-			%if machine_model[0] == machine[2]:
-					    <option value="{{machine_model[0]}}" selected="selected">{{machine_model[1]}} ({{machine_model[2]}})</option>
-			%else:
-					    <option value="{{machine_model[0]}}">{{machine_model[1]}} ({{machine_model[2]}})</option>
-			%end
+<%
+type_num = str(machine_model[3])
+model_num = str(machine_model[4])
+
+type_model = type_num if model_num == '' else type_num+'-'+model_num
+%>
+						    <option value="{{machine_model[0]}}"{{!' selected="selected"' if machine_model[0] == machine[2] else ''}}>{{machine_model[1]}} ({{type_model}})</option>
 		%end
-					</select>
-				</td>
-				<td><input type="text" class="serial" name="{{machine[0]}}_serial" value="{{machine[9]}}" /></td>
-				<td><input type="text" class="unit_value" name="{{machine[0]}}_unit_value" value="{{machine[10]}}" /></td>
-				<td><input type="text" class="invoice" name="{{machine[0]}}_invoice" value="{{machine[11]}}" /></td>
-				<td><input type="text" class="cap_date" name="{{machine[0]}}_cap_date" value="{{machine[12]}}" /></td>
-				<td>
-					<select class="rack" name="{{machine[0]}}_rack" form="machine">
-						<option value="0">None</option>
+						</select>
+					</td>
+					<td><input type="text" class="serial" name="{{machine[0]}}_serial" value="{{machine[9]}}" /></td>
+					<td><input type="text" class="unit_value" name="{{machine[0]}}_unit_value" value="{{machine[10]}}" /></td>
+					<td><input type="text" class="invoice" name="{{machine[0]}}_invoice" value="{{machine[11]}}" /></td>
+					<td><input type="text" class="cap_date" name="{{machine[0]}}_cap_date" value="{{machine[12]}}" /></td>
+					<td>
+						<select class="rack" name="{{machine[0]}}_rack" form="machine">
+							<option value="0">None</option>
 		%for rack in rack_list:
-			%if rack[0] == machine[13]:
-					    <option value="{{rack[0]}}" selected="selected">{{rack[1]}}</option>
-			%else:
-					    <option value="{{rack[0]}}">{{rack[1]}}</option>
-			%end
+						    <option value="{{rack[0]}}"{{!' selected="selected"' if rack[0] == machine[13] else ''}}>{{rack[1]}}</option>
 		%end
-					</select>
-				</td>
-				<td><input type="text" class="base" name="{{machine[0]}}_base" value="{{machine[17]}}" /></td>
-				<td><input type="text" class="baseh" name="{{machine[0]}}_hbase" value="{{machine[18]}}" /></td>
-			</tr>
+						</select>
+					</td>
+					<td><input type="text" class="base" name="{{machine[0]}}_base" value="{{machine[17]}}" /></td>
+					<td><input type="text" class="baseh" name="{{machine[0]}}_hbase" value="{{machine[18]}}" /></td>
+				</tr>
 	%end
 
 			</table>
