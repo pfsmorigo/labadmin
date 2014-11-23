@@ -11,7 +11,7 @@ a:link, a:visited {
 }
 
 a:hover {
-	color: #00F;
+	color: #000;
 	text-decoration: underline;
 }
 
@@ -98,6 +98,10 @@ form .unit_value { width: 80px; }
 #machine_list tr {
 	margin: 0px;
 	padding: 0px;
+}
+
+#machine_list tr:hover {
+	background: #eee;
 }
 
 #machine_list td {

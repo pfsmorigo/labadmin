@@ -71,11 +71,11 @@ def rack(view = ''):
 def machine_edit():
     return machine()
 
-@route('/machine/by_<sort>/edit')
+@route('/machine_by_<sort>/edit')
 def machine_edit(sort):
     return machine(view = 'edit', sort = sort)
 
-@route('/machine/by_<sort>')
+@route('/machine_by_<sort>')
 def machine_edit(sort):
     return machine(sort = sort)
 
@@ -109,17 +109,6 @@ def form_post():
         column_name = attribute.split('_', 1)[1]
         db.query("UPDATE machine SET %s = \"%s\" WHERE id = %s" % (column_name, value, machine_id))
 
-@route('/<view>/<value>')
-def views(view, value):
-    machine_list = db.query("SELECT * FROM machine WHERE "+view+" = '"+value+"' ORDER BY name").fetchall()
-    rack_list = db.query("SELECT * FROM rack_list").fetchall()
-    machine_model_list = db.query("SELECT * FROM machine_model ORDER BY name").fetchall()
-    output = template('details', view = view, info = info, value = value,
-                      machine_list = machine_list,
-                      rack_list = rack_list,
-                      machine_model_list = machine_model_list)
-    return output
-
 @route('/configuration')
 @route('/configuration/brand')
 @route('/configuration/rack_model')
@@ -129,8 +118,8 @@ def configuration():
     return output
 
 @route('/about')
-def about():
-    return template('about', info = info)
+def about(view = 'about'):
+    return template('about', info = info, view = view)
 
 @error(404)
 @error(500)

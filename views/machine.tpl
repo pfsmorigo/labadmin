@@ -9,11 +9,12 @@
 			<a href="/machine"{{!' class="current"' if view == '' else ''}}>list</a>
 			<a href="/machine/edit"{{!' class="current"' if view == 'edit' else ''}}>edit</a>
 		</div>
-		<h2>Machines by {{sort}} (Total: {{len(machine_list)}})</h2>
+		<h2>Machines by {{sort}} (Total: {{len(machine_list)-1}})</h2>
 %if view == "edit":
 		<form method="POST" id="machine" action="/">
 			<table id="details">
 				<tr>
+					<th>Remove</th>
 					<th>Name</th>
 					<th>Model</th>
 					<th>Serial</th>
@@ -25,7 +26,12 @@
 					<th>H Base</th>
 				</tr>
 	%for machine in machine_list:
-			<tr>
+			<tr{{!' class="new"' if machine[0] == 'new' else ''}}>
+		%if machine[0] != 'new':
+				<td><input type="checkbox" name="{{machine[0]}}_del" value="1"></td>
+		%else:
+				<th>New</th>
+		%end
 				<td><input type="text" class="name" name="{{machine[0]}}_name" value="{{machine[1]}}" /></td>
 				<td>
 					<select class="model" name="{{machine[0]}}_model" form="machine">
@@ -64,14 +70,14 @@
 %else:
 		<table id="machine_list">
 			<tr>
-				<th><a href="/machine">Machine</a></th>
-				<th><a href="/machine/by_model">Model</a></th>
-				<th><a href="/machine/by_serial">Serial</a></th>
-				<th><a href="/machine/by_unit_value">Unit Value</a></th>
-				<th><a href="/machine/by_invoice">Invoice</a></th>
-				<th><a href="/machine/by_cap_date">Cap. Date</a></th>
-				<th><a href="/machine/by_size">Size</a></th>
-				<th colspan="2"><a href="/machine/by_location">Location</a></th>
+				<th><a href="/machine">Machine {{!'&#9650;' if sort == 'name' else ''}}</a></th>
+				<th><a href="/machine_by_model">Model{{!' &#9650;' if sort == 'model' else ''}}</a></th>
+				<th><a href="/machine_by_serial">Serial{{!' &#9650;' if sort == 'serial' else ''}}</a></th>
+				<th><a href="/machine_by_unit_value">Unit Value{{!' &#9650;' if sort == 'unit_value' else ''}}</a></th>
+				<th><a href="/machine_by_invoice">Invoice{{!' &#9650;' if sort == 'invoice' else ''}}</a></th>
+				<th><a href="/machine_by_cap_date">Cap. Date{{!' &#9650;' if sort == 'cap_date' else ''}}</a></th>
+				<th><a href="/machine_by_size">Size{{!' &#9650;' if sort == 'size' else ''}}</a></th>
+				<th colspan="2"><a href="/machine_by_location">Location{{!' &#9650;' if sort == 'location' else ''}}</a></th>
 			</tr>
 			%for machine in machine_list[:-1]:
 <%
@@ -88,7 +94,7 @@ uvalue = base if size == '1' else base+' - '+str('{:g}'.format(float(machine[15]
 				<td><a href="/cap_date/{{machine[10]}}">{{machine[10]}}</a></td>
 				<td style="text-align: right"><a href="/size/{{size}}">{{size}}U</a></td>
 				<td><a href="/rack/{{machine[11]}}"{{!' class="deleted"' if machine[14] == 1 else ''}}>{{!machine[12] if machine[11] != 0 else 'None'}}</a></td>
-				<td><a href="/rack/{{machine[11]}}"{{!' class="deleted"' if machine[14] == 1 else ''}}>{{!uvalue if machine[11] != 0 else '-'}}</a></td>
+				<td style="text-align: center"><a href="/rack/{{machine[11]}}"{{!' class="deleted"' if machine[14] == 1 else ''}}>{{!uvalue if machine[11] != 0 else '-'}}</a></td>
 			</tr>
 			%end
 		</table>
