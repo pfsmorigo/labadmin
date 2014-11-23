@@ -11,7 +11,7 @@
 		</div>
 		<h2>Machines by {{sort}} (Total: {{len(machine_list)-1}})</h2>
 %if view == "edit":
-		<form method="POST" id="machine" action="/">
+		<form method="POST" name="machine" action="/machine">
 			<table id="details">
 				<tr>
 					<th>Remove</th>

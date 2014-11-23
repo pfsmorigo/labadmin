@@ -28,7 +28,7 @@ def rack_view():
     return rack()
 
 @route('/rack', method='POST')
-def form_post():
+def rack_post():
     new_name = ''
     new_size = ''
     new_order = ''
@@ -71,6 +71,19 @@ def rack(view = ''):
 def machine_edit():
     return machine()
 
+@route('/machine', method='POST')
+def machine_post():
+    for attribute, value in request.forms.allitems():
+        if value == "None":
+            continue
+        item_id = attribute.split('_', 1)[0]
+        column_name = attribute.split('_', 1)[1]
+        if item_id == "new":
+            print "new: "+item_id+" - "+column_name+" - "+value
+        else:
+            db.query("UPDATE machine SET %s = \"%s\" WHERE id = %s" % (column_name, value, item_id))
+    return machine()
+
 @route('/machine_by_<sort>/edit')
 def machine_edit(sort):
     return machine(view = 'edit', sort = sort)
@@ -100,14 +113,6 @@ def machine(view = '', sort = 'name'):
                       rack_list = rack_list,
                       machine_model_list = machine_model_list)
     return output
-
-@route('/', method='POST')
-def form_post():
-    for attribute, value in request.forms.allitems():
-        if value == "None": continue
-        machine_id = attribute.split('_', 1)[0]
-        column_name = attribute.split('_', 1)[1]
-        db.query("UPDATE machine SET %s = \"%s\" WHERE id = %s" % (column_name, value, machine_id))
 
 @route('/configuration')
 @route('/configuration/brand')
