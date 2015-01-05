@@ -3,7 +3,7 @@
 import os
 import sys
 from sqlalchemy import Column, ForeignKey, Integer, String, Float, Boolean, Date
-from sqlalchemy import create_engine, event
+from sqlalchemy import create_engine, event, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 
@@ -62,15 +62,18 @@ class State(Base):
     id = Column(Integer, primary_key = True)
     name = Column(String(250), nullable = False)
 
-def after_create(target, connection, **kw):
-    DBSession = sessionmaker(bind = engine)
-    session = DBSession()
+def after_create(session):
     session.add(State(name = IN_USE))
     session.add(State(name = NOT_IN_USE))
     session.add(State(name = DISPOSED))
     session.add(State(name = INVALID))
     session.commit()
 
-event.listen(Machine, "after_create", after_create)
 engine = create_engine('sqlite:///labadmin.db')
 Base.metadata.create_all(engine)
+
+DBSession = sessionmaker(bind = engine)
+session = DBSession()
+
+if session.query(State).count() == 0:
+    after_create(session)
