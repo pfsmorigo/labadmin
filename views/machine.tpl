@@ -87,7 +87,7 @@ model_num = machine[6]
 type_model = type_num if model_num == '' else type_num+'-'+model_num
 %>
 			<tr>
-				<td><a href="/id/{{machine[0]}}">{{machine[1]}}</a></td>
+				<td><a href="/machine/id/{{machine[0]}}">{{machine[1]}}</a></td>
 				<td><a href="/model/{{machine[2]}}">{{machine[3]}} ({{type_model}})</a></td>
 				<td><a href="/serial/{{machine[9]}}">{{machine[9]}}</a></td>
 				<td><a href="/unit_value/{{machine[10]}}">{{machine[10]}}</a></td>

@@ -84,27 +84,38 @@ def machine_post():
             db.query("UPDATE machine SET %s = \"%s\" WHERE id = %s" % (column_name, value, item_id))
     return machine()
 
-@route('/machine_by_<sort>/edit')
-def machine_edit(sort):
-    return machine(view = 'edit', sort = sort)
-
-@route('/machine_by_<sort>')
-def machine_edit(sort):
-    return machine(sort = sort)
-
 @route('/machine/edit')
 def machine_edit():
     return machine(view = 'edit')
 
-def machine(view = '', sort = 'name'):
+@route('/machine/id/<id>')
+def machine_id(id):
+    return machine(id = id)
+
+@route('/machine/id/<id>/edit')
+def machine_id_edit(id):
+    return machine(id = id, view = 'edit')
+
+@route('/machine_by_<sort>')
+def machine_sort(sort):
+    return machine(sort = sort)
+
+@route('/machine_by_<sort>/edit')
+def machine_sort_edit(sort):
+    return machine(sort = sort, view = 'edit')
+
+def machine(view = '', id = '', sort = ''):
+    query = "SELECT * FROM machine_list"
+    if id:
+            query += ' WHERE id = '+id
     if sort:
         if sort == 'model':
-            sort_query = ' ORDER BY model_name'
+            query += ' ORDER BY model_name'
         elif sort == 'location':
-            sort_query = ' ORDER BY rack_id = 0, rack_sort, base DESC'
+            query += ' ORDER BY rack_id = 0, rack_sort, base DESC'
         else:
-            sort_query = ' ORDER BY '+sort
-    machine_list = db.query("SELECT * FROM machine_list"+sort_query).fetchall()
+            query += ' ORDER BY '+sort
+    machine_list = db.query(query).fetchall()
     machine_list.append(['new', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''])
     rack_list = db.query("SELECT * FROM rack_list").fetchall()
     machine_model_list = db.query("SELECT * FROM machine_model ORDER BY name").fetchall()
@@ -115,11 +126,17 @@ def machine(view = '', sort = 'name'):
     return output
 
 @route('/configuration')
-@route('/configuration/brand')
-@route('/configuration/rack_model')
-@route('/configuration/machine_model')
-def configuration():
-    output = template('configuration', info = info)
+@route('/configuration/<subject>')
+def configuration(subject = ""):
+    if subject == 'brand':
+        result = db.query("SELECT * FROM machine_brand").fetchall()
+    elif subject == 'rack_model':
+        result = db.query("SELECT * FROM model_type").fetchall()
+    elif subject == 'machine_model':
+        result = db.query("SELECT * FROM machine_model").fetchall()
+    else:
+        result = ""
+    output = template('configuration', info = info, subject = "", result = result)
     return output
 
 @route('/about')
@@ -133,7 +150,7 @@ def error(error):
 
 def dump(obj):
     for attr in dir(obj):
-        if hasattr( obj, attr ):
-            print( "obj.%s = %s" % (attr, getattr(obj, attr)))
+        if hasattr(obj, attr):
+            print("obj.%s = %s" % (attr, getattr(obj, attr)))
 
-run(host='0.0.0.0', port=8080, debug=True)
+run(host='0.0.0.0', port = 8080, debug = True)
