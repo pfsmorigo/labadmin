@@ -1,3 +1,4 @@
-rackview/rackview.svg
-*.swp
 *.pyc
+*.swp
+labadmin.db
+rackview/rackview.svg
