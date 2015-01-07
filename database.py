@@ -31,13 +31,13 @@ class Machine(Base):
     def __init__(self, name, serial, unit_value, invoice, cap_date,
             base, hbase, rack_id, model_id, state_id):
         self.name = name
-        self.serial = serial 
-        self.unit_value = unit_value 
-        self.invoice = invoice 
-        self.cap_date = cap_date 
+        self.serial = serial
+        self.unit_value = unit_value
+        self.invoice = invoice
+        self.cap_date = cap_date
         self.base = base
         self.hbase = hbase
-        self.rack_id = rack_id 
+        self.rack_id = rack_id
         self.model_id = model_id
         self.state_id = state_id
 
@@ -76,7 +76,7 @@ class MachineModel(Base):
         self.type_num = type_num
         self.model_num = model_num
         self.size = size
-        self.horizontal_space = horizontal_space 
+        self.horizontal_space = horizontal_space
         self.type_id = type_id
         self.brand_id = brand_id
 
@@ -95,9 +95,9 @@ class Rack(Base):
 
     def __init__(self, name, size, state_id, sort = None):
         self.name = name
-        self.size = size 
-        self.sort = sort 
-        self.state_id = state_id 
+        self.size = size
+        self.sort = sort
+        self.state_id = state_id
 
     def __repr__(self):
         return "<Rack('%s')>" % self.name
@@ -138,8 +138,8 @@ def database_init(session):
 
 def database_example(session):
     rack_elves = Rack('Elves', 42, 1)
-    rack_dwalves = Rack('Dwalves', 10, 1, 2) 
-    rack_men = Rack('Men', 42, 1, 1) 
+    rack_dwalves = Rack('Dwalves', 10, 1, 2)
+    rack_men = Rack('Men', 42, 1, 1)
 
     brand = Brand('Middle-earth')
 
@@ -158,19 +158,19 @@ def database_example(session):
     machine_model_switch = MachineModel('Switch', 'XYZ', '9999', 1,
             None, machine_type_network.id, brand.id)
 
-    machine_galadriel = Machine('Galadriel', '1362', None, None, None, 10, 10, 
+    machine_galadriel = Machine('Galadriel', '1362', None, None, None, 10, 10,
             rack_elves.id, machine_model_big_server.id, 1)
 
-    machine_turgon = Machine('Turgon', '1300', None, None, None, 10, 10, 
+    machine_turgon = Machine('Turgon', '1300', None, None, None, 10, 10,
             rack_elves.id, machine_model_big_server.id, 1)
 
-    machine_finwe = Machine('Finwe', '1300', None, None, None, 10, 10, 
+    machine_finwe = Machine('Finwe', '1300', None, None, None, 10, 10,
             rack_elves.id, machine_model_big_server.id, 1)
 
-    machine_elros = Machine('Elros', '1300', None, None, None, 10, 10, 
+    machine_elros = Machine('Elros', '1300', None, None, None, 10, 10,
             rack_elves.id, machine_model_server.id, 1)
 
-    machine_tuor = Machine('Tuor', '1300', None, None, None, 10, 10, 
+    machine_tuor = Machine('Tuor', '1300', None, None, None, 10, 10,
             rack_elves.id, machine_model_server.id, 1)
 
     session.add(rack_elves)
