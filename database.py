@@ -140,54 +140,51 @@ def database_example(session):
     rack_elves = Rack('Elves', 42, 1)
     rack_dwalves = Rack('Dwalves', 10, 1, 2)
     rack_men = Rack('Men', 42, 1, 1)
+    session.add(rack_elves)
+    session.add(rack_dwalves)
+    session.add(rack_men)
+    session.flush()
 
     brand = Brand('Middle-earth')
+    session.add(brand)
+    session.flush()
 
     machine_type_server = MachineType('Server')
     machine_type_network = MachineType('Network')
     machine_type_storage = MachineType('Storage')
-
-    machine_type_storage = MachineType('Storage')
-
-    machine_model_server = MachineModel('Server', 'AAA', '1234', 2,
-            None, machine_type_server.id, brand.id)
-
-    machine_model_big_server = MachineModel('Big Server', 'AAA', '4321', 5,
-            None, machine_type_server.id, brand.id)
-
-    machine_model_switch = MachineModel('Switch', 'XYZ', '9999', 1,
-            None, machine_type_network.id, brand.id)
-
-    machine_galadriel = Machine('Galadriel', '1362', None, None, None, 10, 10,
-            rack_elves.id, machine_model_big_server.id, 1)
-
-    machine_turgon = Machine('Turgon', '1300', None, None, None, 10, 10,
-            rack_elves.id, machine_model_big_server.id, 1)
-
-    machine_finwe = Machine('Finwe', '1300', None, None, None, 10, 10,
-            rack_elves.id, machine_model_big_server.id, 1)
-
-    machine_elros = Machine('Elros', '1300', None, None, None, 10, 10,
-            rack_elves.id, machine_model_server.id, 1)
-
-    machine_tuor = Machine('Tuor', '1300', None, None, None, 10, 10,
-            rack_elves.id, machine_model_server.id, 1)
-
-    session.add(rack_elves)
-    session.add(rack_dwalves)
-    session.add(rack_men)
-    session.add(brand)
     session.add(machine_type_server)
     session.add(machine_type_network)
     session.add(machine_type_storage)
+    session.flush()
+
+    machine_model_server = MachineModel('Server', 'AAA', '1234', 2,
+            None, machine_type_server.id, brand.id)
+    machine_model_big_server = MachineModel('Big Server', 'AAA', '4321', 5,
+            None, machine_type_server.id, brand.id)
+    machine_model_switch = MachineModel('Switch', 'XYZ', '9999', 1,
+            None, machine_type_network.id, brand.id)
     session.add(machine_model_server)
     session.add(machine_model_big_server)
     session.add(machine_model_switch)
+    session.flush()
+
+    machine_galadriel = Machine('Galadriel', '1362', None, None, None, 10, 10,
+            rack_elves.id, machine_model_big_server.id, 1)
+    machine_turgon = Machine('Turgon', '1300', None, None, None, 10, 10,
+            rack_elves.id, machine_model_big_server.id, 1)
+    machine_finwe = Machine('Finwe', '1300', None, None, None, 10, 10,
+            rack_elves.id, machine_model_big_server.id, 1)
+    machine_elros = Machine('Elros', '1300', None, None, None, 10, 10,
+            rack_elves.id, machine_model_server.id, 1)
+    machine_tuor = Machine('Tuor', '1300', None, None, None, 10, 10,
+            rack_elves.id, machine_model_server.id, 1)
     session.add(machine_galadriel)
     session.add(machine_turgon)
     session.add(machine_finwe)
     session.add(machine_elros)
     session.add(machine_tuor)
+    session.flush()
+
     session.commit()
 
 engine = create_engine('sqlite:///labadmin.db')
