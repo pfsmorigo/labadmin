@@ -4,15 +4,17 @@ import sys
 import subprocess
 import commands
 from bottle import run, route, request, response, template, static_file, redirect, error
-from classes.database import DatabaseManager
+from database import *
 
-db = DatabaseManager(sys.argv[1], True)
+session = get_session()
+print "Racks:    %u" % session.query(Rack.id).count()
+print "Machines: %u" % session.query(Machine.id).count()
 
 info = {
     "name"     : "labadmin",
     "version"  : commands.getstatusoutput('git describe --abbrev=0 --tags')[1],
-    "racks"    : db.query("SELECT COUNT(*) FROM rack_list").fetchone()[0],
-    "machines" : db.query("SELECT COUNT(*) FROM machine_list").fetchone()[0]
+    "racks"    : session.query(Rack.id).count(),
+    "machines" : session.query(Machine.id).count()
 }
 
 @route('/static/:path#.+#', name='static')

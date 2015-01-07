@@ -203,15 +203,13 @@ def database_example(session):
 
     session.commit()
 
-engine = create_engine('sqlite:///labadmin.db')
-Base.metadata.create_all(engine)
+def get_session():
+    engine = create_engine('sqlite:///labadmin.db')
+    Base.metadata.create_all(engine)
+    DBSession = sessionmaker(bind = engine)
+    return DBSession()
 
-DBSession = sessionmaker(bind = engine)
-session = DBSession()
-
+session = get_session()
 if session.query(State).count() == 0:
     database_init(session)
     database_example(session)
-
-print "Racks:    %u" % session.query(Rack.id).count()
-print "Machines: %u" % session.query(Machine.id).count()
