@@ -134,6 +134,22 @@ def database_init(session):
     session.add(State(NOT_IN_USE))
     session.add(State(DISPOSED))
     session.add(State(INVALID))
+
+    brand = Brand('Generic')
+    session.add(Brand('Generic'))
+    session.flush()
+
+    type = MachineType('Generic')
+    session.add(MachineType('Generic'))
+    session.flush()
+
+    session.add(MachineModel('Generic', '1U', None, 1, None, type.id, brand.id))
+    session.add(MachineModel('Generic', '2U', None, 2, None, type.id, brand.id))
+    session.add(MachineModel('Generic', '3U', None, 3, None, type.id, brand.id))
+    session.add(MachineModel('Generic', '4U', None, 4, None, type.id, brand.id))
+    session.add(MachineModel('Generic', '5U', None, 5, None, type.id, brand.id))
+    session.flush()
+
     session.commit()
 
 def database_example(session):
@@ -196,3 +212,6 @@ session = DBSession()
 if session.query(State).count() == 0:
     database_init(session)
     database_example(session)
+
+print "Racks:    %u" % session.query(Rack.id).count()
+print "Machines: %u" % session.query(Machine.id).count()
