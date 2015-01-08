@@ -7,8 +7,6 @@ from bottle import run, route, request, response, template, static_file, redirec
 from database import *
 
 session = get_session()
-print "Racks:    %u" % session.query(Rack.id).count()
-print "Machines: %u" % session.query(Machine.id).count()
 
 info = {
     "name"     : "labadmin",
@@ -63,11 +61,8 @@ def rack_edit():
     return rack('edit')
 
 def rack(view = ''):
-    subprocess.call(["python", "rackview/rackview.py", sys.argv[1]])
-    rack_list = db.query("SELECT * FROM rack_list").fetchall()
-    rack_list.append(['new', '', '', '', ''])
-    output = template('rack', info = info, view = view, rack_list = rack_list)
-    return output
+    subprocess.call(["python", "rackview/rackview.py", "labadmin.db"])
+    return template('rack', info = info, view = view, rack_list = rack_list(session))
 
 @route('/machine')
 def machine_edit():

@@ -17,29 +17,28 @@
 					<th>Name</th>
 					<th>Size</th>
 					<th>Order</th>
-				</tr>
 	%for rack in rack_list:
-				<tr{{!' class="new"' if rack[0] == 'new' else ''}}>
-		%if rack[0] != 'new':
-					<td><input type="checkbox" name="{{rack[0]}}_state" value="2"></td>
-		%else:
-					<th>New</th>
-		%end
-					<td><input type="text" class="name" name="{{rack[0]}}_name" value="{{rack[1]}}" /></td>
-					<td><input type="text" class="size" name="{{rack[0]}}_size" value="{{rack[2]}}" /></td>
-					<td><input type="text" class="sort" name="{{rack[0]}}_sort" value="{{rack[3]}}" /></td>
+				<tr>
+					<td><input type="checkbox" name="{{rack.id}}_state" value="2"></td>
+					<td><input type="text" class="name" name="{{rack.id}}_name" value="{{rack.name}}" /></td>
+					<td><input type="text" class="size" name="{{rack.id}}_size" value="{{rack.size}}" /></td>
+					<td><input type="text" class="sort" name="{{rack.id}}_sort" value="{{rack.sort}}" /></td>
 				</tr>
 	%end
+				<tr class="new">
+					<th>New</th>
+					<td><input type="text" class="name" name="new_name" value="" /></td>
+					<td><input type="text" class="size" name="new_size" value="" /></td>
+					<td><input type="text" class="sort" name="new_sort" value="" /></td>
+				</tr>
 			</table>
 			<hr />
 		</form>
 %end
 
-%if len(rack_list) == 1:
+%if rack_list.count():
+		<object class="rackview" type="image/svg+xml" data="/static/rackview.svg"></object>
+%else:
 		<img src="/static/error.svg" />
 		<div id="norack">There is not racks at all!</div>
-%else:
-		<object class="rackview" type="image/svg+xml" data="/static/rackview.svg"></object>
 %end
-
-

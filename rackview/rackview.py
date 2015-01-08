@@ -78,10 +78,13 @@ if len(sys.argv) == 2:
         for machine_row in machine_rows:
             machine_id = machine_row[0]
             machine_name = machine_row[1]
-            machine_base = rack_title_size+border_size+rack_height-rack_base_height-((machine_row[2]-1)*u_height)
-            machine_hbase = machine_row[3]
-            machine_size = machine_row[4]*u_height
-            machine_hspace = machine_row[5]
+            machine_base = rack_title_size+border_size+rack_height-rack_base_height-((float(machine_row[2])-1)*u_height)
+            machine_hbase = float(machine_row[3])
+            machine_size = float(machine_row[4])*u_height
+            if machine_row[5]:
+                machine_hspace = float(machine_row[5])
+            else:
+                machine_hspace = 1
             machine_model_name = str(machine_row[6])
             machine_type = str(machine_row[7])
             machine_model = str(machine_row[8])

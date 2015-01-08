@@ -150,11 +150,58 @@ def database_init(session):
     session.add(MachineModel('Generic', '5U', None, 5, None, type.id, brand.id))
     session.flush()
 
+    session.execute("""
+            CREATE VIEW "rack_list" AS SELECT
+                    rack.*,
+                    SUM(mmm.used) AS used
+                FROM rack
+                LEFT JOIN (SELECT machine.rack_id,
+                                  MAX(machine_model.size) AS used
+                           FROM machine, machine_model
+                           WHERE machine.model_id = machine_model.rowid
+                           GROUP BY rack_id, base) AS mmm
+                ON rack.id = mmm.rack_id
+                WHERE (mmm.rack_id IS NULL OR mmm.rack_id = rack.id)
+                AND rack.state_id == 1
+                GROUP BY rack.id
+                ORDER BY sort, name COLLATE NOCASE ASC;
+            """)
+
+    session.execute("""
+            CREATE VIEW "machine_list" AS SELECT
+                    machine.id AS id,
+                    machine.name,
+                    machine_model.id AS model_id,
+                    machine_model.name AS model_name,
+                    machine_model.type_id AS type_id,
+                    machine_model.type_num AS type_num,
+                    machine_model.model_num AS model_num,
+                    machine_model.size AS size,
+                    machine_model.horizontal_space AS hspace,
+                    machine.serial AS serial,
+                    machine.unit_value AS unit_value,
+                    machine.invoice AS invoice,
+                    machine.cap_date AS cap_date,
+                    machine.rack_id AS rack_id,
+                    rack.name AS rack_name,
+                    rack.sort AS rack_sort,
+                    rack.state_id AS rack_state_id,
+                    machine.base,
+                    machine.hbase,
+                    machine.state_id
+                FROM machine, machine_model
+                LEFT OUTER JOIN rack
+                WHERE (machine.rack_id IS 0 OR machine.rack_id = rack.rowid)
+                AND machine.model_id = machine_model.id
+                GROUP BY machine.id
+                ORDER BY machine.name COLLATE NOCASE ASC;
+            """)
+
     session.commit()
 
 def database_example(session):
     rack_elves = Rack('Elves', 42, 1)
-    rack_dwalves = Rack('Dwalves', 10, 1, 2)
+    rack_dwalves = Rack('Dwalves', 30, 1, 2)
     rack_men = Rack('Men', 42, 1, 1)
     session.add(rack_elves)
     session.add(rack_dwalves)
@@ -209,7 +256,27 @@ def get_session():
     DBSession = sessionmaker(bind = engine)
     return DBSession()
 
+def rack_list(session):
+    return (session.query(Rack))
+
+    #return (session.query(Rack, func.count(Client.id)).
+            #outerjoin(ClientIp, ClientIp.ip_id==Ip.id).
+            #outerjoin(Client, Client.id==ClientIp.client_id).
+            #group_by(Rack.id))
+
+
 session = get_session()
 if session.query(State).count() == 0:
     database_init(session)
     database_example(session)
+
+print ""
+print "labadmin"
+print "--------"
+print "%5u racks" % session.query(Rack.id).count()
+print "%5u machines" % session.query(Machine.id).count()
+print "%5u machine models" % session.query(MachineModel.id).count()
+print "%5u machine types" % session.query(MachineType.id).count()
+print "%5u brands" % session.query(Brand.id).count()
+print "%5u states" % session.query(State.id).count()
+print ""
