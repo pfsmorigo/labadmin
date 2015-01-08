@@ -200,9 +200,9 @@ def database_init(session):
     session.commit()
 
 def database_example(session):
-    rack_elves = Rack('Elves', 42, 1)
-    rack_dwalves = Rack('Dwalves', 30, 1, 2)
-    rack_men = Rack('Men', 42, 1, 1)
+    rack_elves = Rack('Elves', 30, 1)
+    rack_dwalves = Rack('Dwalves', 20, 1, 2)
+    rack_men = Rack('Men', 30, 1, 1)
     session.add(rack_elves)
     session.add(rack_dwalves)
     session.add(rack_men)
@@ -231,15 +231,15 @@ def database_example(session):
     session.add(machine_model_switch)
     session.flush()
 
-    machine_galadriel = Machine('Galadriel', '1362', None, None, None, 10, 10,
+    machine_galadriel = Machine('Galadriel', '1362', None, None, None, 1, 0,
             rack_elves.id, machine_model_big_server.id, 1)
-    machine_turgon = Machine('Turgon', '1300', None, None, None, 10, 10,
+    machine_turgon = Machine('Turgon', '1300', None, None, None, 6, 0,
             rack_elves.id, machine_model_big_server.id, 1)
-    machine_finwe = Machine('Finwe', '1300', None, None, None, 10, 10,
+    machine_finwe = Machine('Finwe', '1300', None, None, None, 24, 0,
             rack_elves.id, machine_model_big_server.id, 1)
-    machine_elros = Machine('Elros', '1300', None, None, None, 10, 10,
+    machine_elros = Machine('Elros', '1300', None, None, None, 18, 0,
             rack_elves.id, machine_model_server.id, 1)
-    machine_tuor = Machine('Tuor', '1300', None, None, None, 10, 10,
+    machine_tuor = Machine('Tuor', '1300', None, None, None, 20, 0,
             rack_elves.id, machine_model_server.id, 1)
     session.add(machine_galadriel)
     session.add(machine_turgon)
