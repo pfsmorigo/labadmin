@@ -201,10 +201,10 @@ def database_init(session):
 
 def database_example(session):
     rack_elves = Rack('Elves', 30, 1)
-    rack_dwalves = Rack('Dwalves', 20, 1, 2)
+    rack_dwarves = Rack('Dwarves', 20, 1, 2)
     rack_men = Rack('Men', 30, 1, 1)
     session.add(rack_elves)
-    session.add(rack_dwalves)
+    session.add(rack_dwarves)
     session.add(rack_men)
     session.flush()
 
@@ -220,34 +220,64 @@ def database_example(session):
     session.add(machine_type_storage)
     session.flush()
 
-    machine_model_server = MachineModel('Server', 'AAA', '1234', 2,
-            None, machine_type_server.id, brand.id)
-    machine_model_big_server = MachineModel('Big Server', 'AAA', '4321', 5,
-            None, machine_type_server.id, brand.id)
-    machine_model_switch = MachineModel('Switch', 'XYZ', '9999', 1,
-            None, machine_type_network.id, brand.id)
+    machine_model_server = MachineModel('Server', None, None, 2, None,
+            machine_type_server.id, brand.id)
+    machine_model_big_server = MachineModel('Big Server', None, None, 5, None,
+            machine_type_server.id, brand.id)
+    machine_model_switch = MachineModel('Switch', None, None, 1, None,
+            machine_type_network.id, brand.id)
+    machine_model_desktop = MachineModel('Desktop', None, None, 8.5, 0.3,
+            machine_type_network.id, brand.id)
     session.add(machine_model_server)
     session.add(machine_model_big_server)
     session.add(machine_model_switch)
+    session.add(machine_model_desktop)
     session.flush()
 
-    machine_galadriel = Machine('Galadriel', '1362', None, None, None, 1, 0,
-            rack_elves.id, machine_model_big_server.id, 1)
-    machine_turgon = Machine('Turgon', '1300', None, None, None, 6, 0,
-            rack_elves.id, machine_model_big_server.id, 1)
-    machine_finwe = Machine('Finwe', '1300', None, None, None, 24, 0,
-            rack_elves.id, machine_model_big_server.id, 1)
-    machine_elros = Machine('Elros', '1300', None, None, None, 18, 0,
-            rack_elves.id, machine_model_server.id, 1)
-    machine_tuor = Machine('Tuor', '1300', None, None, None, 20, 0,
-            rack_elves.id, machine_model_server.id, 1)
-    session.add(machine_galadriel)
-    session.add(machine_turgon)
-    session.add(machine_finwe)
-    session.add(machine_elros)
-    session.add(machine_tuor)
-    session.flush()
-
+    session.add(Machine('Legolas', None, None, None, None, 30, None,
+        rack_elves.id, machine_model_switch.id, 1))
+    session.add(Machine('Finwe', None, None, None, None, 23.5, None,
+        rack_elves.id, machine_model_big_server.id, 1))
+    session.add(Machine('Celeborn', None, None, None, None, 21, None,
+        rack_elves.id, machine_model_server.id, 1))
+    session.add(Machine('Tuor', None, None, None, None, 11, 0.15,
+        rack_elves.id, machine_model_desktop.id, 1))
+    session.add(Machine('Elros', None, None, None, None, 11, 0.55,
+        rack_elves.id, machine_model_desktop.id, 1))
+    session.add(Machine('Turgon', None, None, None, None, 6, None,
+        rack_elves.id, machine_model_server.id, 1))
+    session.add(Machine('Galadriel', None, None, None, None, 1, None,
+        rack_elves.id, machine_model_big_server.id, 1))
+    session.add(Machine('Boromir', None, None, None, None, 30, None,
+        rack_men.id, machine_model_switch.id, 1))
+    session.add(Machine('Aragorn', None, None, None, None, 28, None,
+        rack_men.id, machine_model_server.id, 1))
+    session.add(Machine('Faramir', None, None, None, None, 26, None,
+        rack_men.id, machine_model_server.id, 1))
+    session.add(Machine('Turgon', None, None, None, None, 20, None,
+        rack_men.id, machine_model_big_server.id, 1))
+    session.add(Machine('Turin', None, None, None, None, 15, None,
+        rack_men.id, machine_model_big_server.id, 1))
+    session.add(Machine('Beren', None, None, None, None, 10, None,
+        rack_men.id, machine_model_big_server.id, 1))
+    session.add(Machine('Denethor', None, None, None, None, 8, None,
+        rack_men.id, machine_model_server.id, 1))
+    session.add(Machine('Hurin', None, None, None, None, 6, None,
+        rack_men.id, machine_model_server.id, 1))
+    session.add(Machine('Egalmoth', None, None, None, None, 1, None,
+        rack_men.id, machine_model_big_server.id, 1))
+    session.add(Machine('Bofur', None, None, None, None, 18, None,
+        rack_dwarves.id, machine_model_server.id, 1))
+    session.add(Machine('Thorin', None, None, None, None, 16, None,
+        rack_dwarves.id, machine_model_server.id, 1))
+    session.add(Machine('Oin', None, None, None, None, 10, None,
+        rack_dwarves.id, machine_model_server.id, 1))
+    session.add(Machine('Dori', None, None, None, None, 6, None,
+        rack_dwarves.id, machine_model_server.id, 1))
+    session.add(Machine('Balin', None, None, None, None, 4, None,
+        rack_dwarves.id, machine_model_server.id, 1))
+    session.add(Machine('Gloin', None, None, None, None, 1, None,
+        rack_dwarves.id, machine_model_server.id, 1))
     session.commit()
 
 def get_session():
