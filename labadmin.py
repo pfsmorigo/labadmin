@@ -35,9 +35,15 @@ def rack_post():
     for attribute, value in request.forms.allitems():
         if value == "None":
             continue
+
         item_id = attribute.split('_', 1)[0]
         column_name = attribute.split('_', 1)[1]
-        if item_id == "new":
+
+        if item_id != "new":
+            print "db update: rack, %s, %s, %s." % (item_id, column_name, value)
+            session.query(Rack).filter_by(id = item_id).update({column_name: value})
+            session.commit()
+        else:
             if column_name == 'name':
                 new_name = value
             if column_name == 'size':
@@ -50,10 +56,12 @@ def rack_post():
                     new_sort = int(value)
                 except ValueError:
                     print "ERROR: Invalid sort value (%s)." % value
-        else:
-            db.query("UPDATE rack SET %s = \"%s\" WHERE id = %s" % (column_name, value, item_id))
+
     if new_name and new_size and new_sort:
-        db.query("INSERT INTO rack VALUES(NULL, '%s', %d, %d, 0)" % (new_name, new_size, new_sort))
+        print "db insert: rack, %s, %s, %s." % (new_name, new_size, new_sort)
+        session.add(Rack(new_name, new_size, 1, new_sort))
+        session.commit()
+
     return rack()
 
 @route('/rack/edit')
@@ -63,6 +71,7 @@ def rack_edit():
 def rack(view = ''):
     subprocess.call(["python", "rackview/rackview.py", "labadmin.db"])
     return template('rack', info = info, view = view, rack_list = rack_list(session))
+
 
 @route('/machine')
 def machine_edit():
