@@ -24,8 +24,13 @@ def url_redirect():
     redirect("/rack")
 
 @route('/rack')
-def rack_view():
-    return rack()
+def rack(view = ''):
+    subprocess.call(["python", "rackview/rackview.py", "labadmin.db"])
+    return template('rack', info = info, view = view, rack_list = rack_list(session))
+
+@route('/rack/edit')
+def rack_edit():
+    return rack('edit')
 
 @route('/rack', method='POST')
 def rack_post():
@@ -71,31 +76,12 @@ def rack_post():
 
     return rack()
 
-@route('/rack/edit')
-def rack_edit():
-    return rack('edit')
-
-def rack(view = ''):
-    subprocess.call(["python", "rackview/rackview.py", "labadmin.db"])
-    return template('rack', info = info, view = view, rack_list = rack_list(session))
-
-
 @route('/machine')
-def machine_edit():
-    return machine()
-
-@route('/machine', method='POST')
-def machine_post():
-    for attribute, value in request.forms.allitems():
-        if value == "None":
-            continue
-        item_id = attribute.split('_', 1)[0]
-        column_name = attribute.split('_', 1)[1]
-        if item_id == "new":
-            print "new: "+item_id+" - "+column_name+" - "+value
-        else:
-            db.query("UPDATE machine SET %s = \"%s\" WHERE id = %s" % (column_name, value, item_id))
-    return machine()
+def machine(view = '', id = '', sort = ''):
+    return template('machine', info = info, view = view, sort = sort,
+            machine_list = machine_list(session, id, sort),
+            rack_list = rack_list(session),
+            machine_model_list = machine_model_list(session))
 
 @route('/machine/edit')
 def machine_edit():
@@ -117,26 +103,18 @@ def machine_sort(sort):
 def machine_sort_edit(sort):
     return machine(sort = sort, view = 'edit')
 
-def machine(view = '', id = '', sort = ''):
-    query = "SELECT * FROM machine_list"
-    if id:
-            query += ' WHERE id = '+id
-    if sort:
-        if sort == 'model':
-            query += ' ORDER BY model_name'
-        elif sort == 'location':
-            query += ' ORDER BY rack_id = 0, rack_sort, base DESC'
+@route('/machine', method='POST')
+def machine_post():
+    for attribute, value in request.forms.allitems():
+        if value == "None":
+            continue
+        item_id = attribute.split('_', 1)[0]
+        column_name = attribute.split('_', 1)[1]
+        if item_id == "new":
+            print "new: "+item_id+" - "+column_name+" - "+value
         else:
-            query += ' ORDER BY '+sort
-    machine_list = db.query(query).fetchall()
-    machine_list.append(['new', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''])
-    rack_list = db.query("SELECT * FROM rack_list").fetchall()
-    machine_model_list = db.query("SELECT * FROM machine_model ORDER BY name").fetchall()
-    output = template('machine', info = info, view = view, sort = sort,
-                      machine_list = machine_list,
-                      rack_list = rack_list,
-                      machine_model_list = machine_model_list)
-    return output
+            db.query("UPDATE machine SET %s = \"%s\" WHERE id = %s" % (column_name, value, item_id))
+    return machine()
 
 @route('/configuration')
 @route('/configuration/<subject>')

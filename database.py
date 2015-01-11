@@ -28,6 +28,10 @@ class Machine(Base):
     model_id = Column(Integer, ForeignKey('machine_model.id'))
     state_id = Column(Integer, ForeignKey('state.id'))
 
+    model = relationship('MachineModel')
+    rack = relationship('Rack')
+    state = relationship('State')
+
     def __init__(self, name, serial, unit_value, invoice, cap_date,
             base, hbase, rack_id, model_id, state_id):
         self.name = name
@@ -44,12 +48,34 @@ class Machine(Base):
     def __repr__(self):
         return "<Machine('%s')>" % self.name
 
+    def get_base(self):
+        return str('{:g}'.format(float(self.base)))
+
+    def get_size(self):
+        return '{:g}'.format(float(self.model.size))
+
+    def get_type_model(self):
+        if self.model.type_num == None and self.model.model_num == None:
+            return "?"
+        elif self.model.type_num == None:
+            return self.model.model_num
+        elif self.model.model_num == None:
+            return self.model.type_num
+        else:
+            return self.model.type_num+'-'+self.model.model_num
+
+    def get_location(self):
+        if self.base == None or self.rack.state_id != 1:
+            return '-'
+        elif self.model.size == 1:
+            return self.get_base()
+        else:
+            return self.get_base()+' - '+str('{:g}'.format(float(self.base+self.model.size-1)))
+
 class MachineType(Base):
     __tablename__ = 'machine_type'
     id = Column(Integer, primary_key = True)
     name = Column(String(100), nullable = False)
-
-    machine_model = relationship("MachineModel")
 
     def __init__(self, name):
         self.name = name
@@ -67,8 +93,6 @@ class MachineModel(Base):
     horizontal_space = Column(Float, nullable = True)
     type_id = Column(Integer, ForeignKey('machine_type.id'))
     brand_id = Column(Integer, ForeignKey('brand.id'))
-
-    machine = relationship("Machine")
 
     def __init__(self, name, type_num, model_num, size, horizontal_space,
             type_id, brand_id):
@@ -91,8 +115,6 @@ class Rack(Base):
     sort = Column(Integer, nullable = True)
     state_id = Column(Integer, ForeignKey('state.id'))
 
-    machine = relationship("Machine")
-
     def __init__(self, name, size, state_id, sort = None):
         self.name = name
         self.size = size
@@ -107,8 +129,6 @@ class Brand(Base):
     id = Column(Integer, primary_key = True)
     name = Column(String(250), nullable = False)
 
-    machine_model = relationship("MachineModel")
-
     def __init__(self, name):
         self.name = name
 
@@ -119,9 +139,6 @@ class State(Base):
     __tablename__ = 'state'
     id = Column(Integer, primary_key = True)
     name = Column(String(250), nullable = False)
-
-    machine = relationship("Machine")
-    rack = relationship("Rack")
 
     def __init__(self, name):
         self.name = name
@@ -291,6 +308,14 @@ def rack_list(session):
     #print str(query.statement.compile())
     return query
 
+def machine_model_list(session):
+    query = session.query(MachineModel).order_by(collate(MachineModel.name, 'NOCASE'))
+    return query
+
+def machine_list(session, id = '', sort = ''):
+    query = session.query(Machine).order_by(collate(Machine.name, 'NOCASE'))
+    return query
+
 session = get_session()
 if session.query(State).count() == 0:
     database_init(session)
@@ -306,3 +331,5 @@ print "%5u machine types" % session.query(MachineType.id).count()
 print "%5u brands" % session.query(Brand.id).count()
 print "%5u states" % session.query(State.id).count()
 print ""
+
+machine_list(session)
