@@ -40,6 +40,8 @@ def rack_post():
         column_name = attribute.split('_', 1)[1]
 
         if item_id != "new":
+            if column_name == 'state':
+                column_name = 'state_id'
             print "db update: rack, %s, %s, %s." % (item_id, column_name, value)
             session.query(Rack).filter_by(id = item_id).update({column_name: value})
             session.commit()
@@ -51,6 +53,11 @@ def rack_post():
                     new_size = int(value)
                 except ValueError:
                     print "ERROR: Invalid size value (%s)." % value
+            if column_name == 'state':
+                try:
+                    new_state = int(value)
+                except ValueError:
+                    print "ERROR: Invalid state value (%s)." % value
             if column_name == 'sort':
                 try:
                     new_sort = int(value)
@@ -58,8 +65,8 @@ def rack_post():
                     print "ERROR: Invalid sort value (%s)." % value
 
     if new_name and new_size and new_sort:
-        print "db insert: rack, %s, %s, %s." % (new_name, new_size, new_sort)
-        session.add(Rack(new_name, new_size, 1, new_sort))
+        print "db insert: rack, %s, %s, new_state, %s." % (new_name, new_size, new_state, new_sort)
+        session.add(Rack(new_name, new_size, new_state, new_sort))
         session.commit()
 
     return rack()

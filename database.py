@@ -287,11 +287,9 @@ def get_session():
     return DBSession()
 
 def rack_list(session):
-    rack_use = aliased(session.query(Machine.rack_id, func.max(MachineModel.size).label('used')).filter(Machine.model_id == MachineModel.id).group_by(Machine.rack_id, Machine.base).subquery(), name = 'rack_use')
-    query = session.query(Rack, func.sum(rack_use.c.used).label('used')).outerjoin(rack_use).filter(or_(rack_use.c.rack_id == None, rack_use.c.rack_id == Rack.id)).filter(and_(Rack.state_id == 1)).group_by(Rack.id).order_by(Rack.sort, collate(Rack.name, 'NOCASE'))
-    print str(query.statement.compile())
+    query = session.query(Rack).filter(Rack.state_id == 1).order_by(Rack.sort, collate(Rack.name, 'NOCASE'))
+    #print str(query.statement.compile())
     return query
-
 
 session = get_session()
 if session.query(State).count() == 0:
@@ -308,5 +306,3 @@ print "%5u machine types" % session.query(MachineType.id).count()
 print "%5u brands" % session.query(Brand.id).count()
 print "%5u states" % session.query(State.id).count()
 print ""
-
-rack_list(session)
