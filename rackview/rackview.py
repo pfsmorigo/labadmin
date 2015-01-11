@@ -96,9 +96,9 @@ if len(sys.argv) == 2:
             #print "%15s | %15s: %4.1f (%5.1f) %4.1f (%5.1f)" % (rack_name, machine_name, machine_row[1], machine_base, machine_row[2], machine_size)
 
             if machine_serial == "None":
-                url_view = "/id/"+str(machine_id)
+                url_view = "/machine/id/"+str(machine_id)
             else:
-                url_view = "/serial/"+machine_serial
+                url_view = "/machine/serial/"+machine_serial
 
             machine = dwg.a(url_view, target = "_parent", class_ = "machine")
 
