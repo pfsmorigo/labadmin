@@ -103,7 +103,7 @@ type_model = machine_model.type_num if machine_model.model_num == '' else machin
 			%for machine in machine_list:
 			<tr>
 				<td><a href="/machine/id/{{machine.id}}">{{machine.name}}</a></td>
-				<td><a href="/model/{{machine.model.id}}">{{machine.model.name}} ({{machine.get_type_model()}})</a></td>
+				<td><a href="/model/{{machine.model.id}}">{{machine.model.name}} {{!'' if machine.get_type_model() == '' else '('+machine.get_type_model()+')'}}</a></td>
 				<td><a href="/serial/{{machine.serial}}">{{machine.serial}}</a></td>
 				<td><a href="/unit_value/{{machine.unit_value}}">{{machine.unit_value}}</a></td>
 				<td><a href="/invoice/{{machine.invoice}}">{{machine.invoice}}</a></td>

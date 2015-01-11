@@ -56,7 +56,7 @@ class Machine(Base):
 
     def get_type_model(self):
         if self.model.type_num == None and self.model.model_num == None:
-            return "?"
+            return ''
         elif self.model.type_num == None:
             return self.model.model_num
         elif self.model.model_num == None:
