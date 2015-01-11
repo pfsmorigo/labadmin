@@ -30,7 +30,7 @@
 					<td><input type="checkbox" name="{{machine.id}}_del" value="1"></td>
 					<td><input type="text" class="name" name="{{machine.id}}_name" value="{{machine.name}}" /></td>
 					<td>
-						<select class="model" name="{{machine.id}}_model" form="machine">
+						<select class="model" name="{{machine.id}}_model_id">
 		%for machine_model in machine_model_list:
 						    <option value="{{machine_model.id}}"{{!' selected="selected"' if machine_model.id == machine.model_id else ''}}>{{machine_model.get_description()}}</option>
 		%end
@@ -41,7 +41,7 @@
 					<td><input type="text" class="invoice" name="{{machine.id}}_invoice" value="{{machine.invoice}}" /></td>
 					<td><input type="text" class="cap_date" name="{{machine.id}}_cap_date" value="{{machine.cap_date}}" /></td>
 					<td>
-						<select class="rack" name="{{machine.id}}_rack" form="machine">
+						<select class="rack" name="{{machine.id}}_rack_id">
 							<option value="0">None</option>
 		%for rack in rack_list:
 						    <option value="{{rack.id}}"{{!' selected="selected"' if rack.id == machine.rack_id else ''}}>{{rack.name}}</option>
@@ -56,7 +56,7 @@
 					<th>New</th>
 					<td><input type="text" class="name" name="new_name" /></td>
 					<td>
-						<select class="model" name="new_model" form="machine">
+						<select class="model" name="new_model_id">
 		%for machine_model in machine_model_list:
 						    <option value="{{machine_model.id}}">{{machine_model.get_description()}})</option>
 		%end
@@ -67,7 +67,7 @@
 					<td><input type="text" class="invoice" name="new_invoice" /></td>
 					<td><input type="text" class="cap_date" name="new_cap_date" /></td>
 					<td>
-						<select class="rack" name="new_rack" form="machine">
+						<select class="rack" name="new_rack_id">
 							<option value="0">None</option>
 		%for rack in rack_list:
 						    <option value="{{rack.id}}">{{rack.name}}</option>

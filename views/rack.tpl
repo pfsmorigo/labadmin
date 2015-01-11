@@ -19,7 +19,7 @@
 					<th>Order</th>
 	%for rack in rack_list:
 				<tr>
-					<td><input type="checkbox" name="{{rack.id}}_state" value="2"></td>
+					<td><input type="checkbox" name="{{rack.id}}_state_id" value="2"></td>
 					<td><input type="text" class="name" name="{{rack.id}}_name" value="{{rack.name}}" /></td>
 					<td><input type="text" class="size" name="{{rack.id}}_size" value="{{rack.size}}" /></td>
 					<td><input type="text" class="sort" name="{{rack.id}}_sort" value="{{rack.sort}}" /></td>
