@@ -54,16 +54,6 @@ class Machine(Base):
     def get_size(self):
         return '{:g}'.format(float(self.model.size))
 
-    def get_type_model(self):
-        if self.model.type_num == None and self.model.model_num == None:
-            return ''
-        elif self.model.type_num == None:
-            return self.model.model_num
-        elif self.model.model_num == None:
-            return self.model.type_num
-        else:
-            return self.model.type_num+'-'+self.model.model_num
-
     def get_location(self):
         if self.base == None or self.rack.state_id != 1:
             return '-'
@@ -106,6 +96,27 @@ class MachineModel(Base):
 
     def __repr__(self):
         return "<MachineModel('%s')>" % self.name
+
+    def get_description(self):
+        if self.type_num == None and self.model_num == None:
+            return self.name
+        elif self.type_num == None:
+            return self.name+' ('+self.model_num+')'
+        elif self.model_num == None:
+            return self.name+' ('+self.type_num+')'
+        else:
+            return self.name+' ('+self.type_num+'-'+self.model_num+')'
+
+    def get_type_model(self):
+        if self.type_num == None and self.model_num == None:
+            return ''
+        elif self.type_num == None:
+            return self.model_num
+        elif self.model_num == None:
+            return self.type_num
+        else:
+            return self.type_num+'-'+self.model_num
+
 
 class Rack(Base):
     __tablename__ = 'rack'

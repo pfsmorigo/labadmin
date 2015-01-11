@@ -32,13 +32,7 @@
 					<td>
 						<select class="model" name="{{machine.id}}_model" form="machine">
 		%for machine_model in machine_model_list:
-<%
-type_num = str(machine_model[3])
-model_num = str(machine_model[4])
-
-type_model = type_num if model_num == '' else type_num+'-'+model_num
-%>
-						    <option value="{{machine_model.id}}"{{!' selected="selected"' if machine_model.id == machine.model_id else ''}}>{{machine_model.name}} ({{type_model}})</option>
+						    <option value="{{machine_model.id}}"{{!' selected="selected"' if machine_model.id == machine.model_id else ''}}>{{machine_model.get_description()}}</option>
 		%end
 						</select>
 					</td>
@@ -64,10 +58,7 @@ type_model = type_num if model_num == '' else type_num+'-'+model_num
 					<td>
 						<select class="model" name="new_model" form="machine">
 		%for machine_model in machine_model_list:
-<%
-type_model = machine_model.type_num if machine_model.model_num == '' else machine_model.type_num+'-'+machine_model.model_num
-%>
-						    <option value="{{machine_model.id}}">{{machine_model.name}} ({{type_model}})</option>
+						    <option value="{{machine_model.id}}">{{machine_model.get_description()}})</option>
 		%end
 						</select>
 					</td>
@@ -103,7 +94,7 @@ type_model = machine_model.type_num if machine_model.model_num == '' else machin
 			%for machine in machine_list:
 			<tr>
 				<td><a href="/machine/id/{{machine.id}}">{{machine.name}}</a></td>
-				<td><a href="/model/{{machine.model.id}}">{{machine.model.name}} {{!'' if machine.get_type_model() == '' else '('+machine.get_type_model()+')'}}</a></td>
+				<td><a href="/model/{{machine.model.id}}">{{machine.model.name}} {{!'' if machine.model.get_type_model() == '' else '('+machine.model.get_type_model()+')'}}</a></td>
 				<td><a href="/serial/{{machine.serial}}">{{machine.serial}}</a></td>
 				<td><a href="/unit_value/{{machine.unit_value}}">{{machine.unit_value}}</a></td>
 				<td><a href="/invoice/{{machine.invoice}}">{{machine.invoice}}</a></td>
