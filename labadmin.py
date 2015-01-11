@@ -5,6 +5,7 @@ import subprocess
 import commands
 from bottle import run, route, request, response, template, static_file, redirect, error
 from database import *
+from types import IntType, FloatType
 
 session = get_session()
 
@@ -45,8 +46,6 @@ def rack_post():
         column_name = attribute.split('_', 1)[1]
 
         if item_id != "new":
-            if column_name == 'state':
-                column_name = 'state_id'
             print "db update: rack, %s, %s, %s." % (item_id, column_name, value)
             session.query(Rack).filter_by(id = item_id).update({column_name: value})
             session.commit()
@@ -54,20 +53,11 @@ def rack_post():
             if column_name == 'name':
                 new_name = value
             if column_name == 'size':
-                try:
-                    new_size = int(value)
-                except ValueError:
-                    print "ERROR: Invalid size value (%s)." % value
+                new_size = convert(value, IntType)
             if column_name == 'state':
-                try:
-                    new_state = int(value)
-                except ValueError:
-                    print "ERROR: Invalid state value (%s)." % value
+                new_state = convert(value, IntType)
             if column_name == 'sort':
-                try:
-                    new_sort = int(value)
-                except ValueError:
-                    print "ERROR: Invalid sort value (%s)." % value
+                new_sort = convert(value, IntType)
 
     if new_name and new_size and new_sort:
         print "db insert: rack, %s, %s, new_state, %s." % (new_name, new_size, new_state, new_sort)
@@ -105,15 +95,35 @@ def machine_sort_edit(sort):
 
 @route('/machine', method='POST')
 def machine_post():
+    new_name = ''
+    new_size = ''
+    new_order = ''
     for attribute, value in request.forms.allitems():
         if value == "None":
             continue
+
         item_id = attribute.split('_', 1)[0]
         column_name = attribute.split('_', 1)[1]
-        if item_id == "new":
-            print "new: "+item_id+" - "+column_name+" - "+value
+
+        if item_id != "new":
+            print "db update: machine, %s, %s, %s." % (item_id, column_name, value)
+            session.query(Machine).filter_by(id = item_id).update({column_name: value})
+            session.commit()
         else:
-            db.query("UPDATE machine SET %s = \"%s\" WHERE id = %s" % (column_name, value, item_id))
+            if column_name == 'name':
+                new_name = value
+            if column_name == 'size':
+                new_size = convert(value, IntType)
+            if column_name == 'state':
+                new_state = convert(value, IntType)
+            if column_name == 'sort':
+                new_sort = convert(value, IntType)
+
+    if new_name and new_size and new_sort:
+        print "db insert: rack, %s, %s, new_state, %s." % (new_name, new_size, new_state, new_sort)
+        session.add(Rack(new_name, new_size, new_state, new_sort))
+        session.commit()
+
     return machine()
 
 @route('/configuration')
@@ -138,6 +148,15 @@ def about(view = 'about'):
 @error(500)
 def error(error):
     return template('error', info = info, error = error)
+
+def convert(value, var_type):
+    try:
+        if var_type == IntType:
+            return int(value)
+        elif var_type == FloatType:
+            return float(value)
+    except ValueError:
+        print "invalid size value (%s)." % value
 
 def dump(obj):
     for attr in dir(obj):
