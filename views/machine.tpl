@@ -39,7 +39,26 @@
 					<td><input type="text" class="serial" name="{{machine.id}}_serial" value="{{machine.serial}}" /></td>
 					<td><input type="text" class="unit_value" name="{{machine.id}}_unit_value" value="{{machine.unit_value}}" /></td>
 					<td><input type="text" class="invoice" name="{{machine.id}}_invoice" value="{{machine.invoice}}" /></td>
-					<td><input type="text" class="cap_date" name="{{machine.id}}_cap_date" value="{{machine.cap_date}}" /></td>
+					<td>
+						<select class="cap_date_year" name="{{machine.id}}_cap_date_year">
+							<option value="0">-</option>
+		%for year in range(1990, 2015):
+							<option value="{{year}}">{{year}}</option>
+		%end
+						</select>
+						<select class="cap_date_month" name="new_cap_date_month">
+							<option value="0">-</option>
+		%for month in range(1, 12):
+							<option value="{{month}}">{{month}}</option>
+		%end
+						</select>
+						<select class="cap_date_day" name="new_cap_date_day">
+							<option value="0">-</option>
+		%for day in range(1, 31):
+							<option value="{{day}}">{{day}}</option>
+		%end
+						</select>
+					</td>
 					<td>
 						<select class="rack" name="{{machine.id}}_rack_id">
 							<option value="0">None</option>
@@ -58,19 +77,38 @@
 					<td>
 						<select class="model" name="new_model_id">
 		%for machine_model in machine_model_list:
-						    <option value="{{machine_model.id}}">{{machine_model.get_description()}})</option>
+						    <option value="{{machine_model.id}}">{{machine_model.get_description()}}</option>
 		%end
 						</select>
 					</td>
 					<td><input type="text" class="serial" name="new_serial" /></td>
 					<td><input type="text" class="unit_value" name="new_unit_value" /></td>
 					<td><input type="text" class="invoice" name="new_invoice" /></td>
-					<td><input type="text" class="cap_date" name="new_cap_date" /></td>
+					<td>
+						<select class="cap_date_year" name="new_cap_date_year">
+							<option value="0">-</option>
+		%for year in range(1990, 2015):
+							<option value="{{year}}">{{year}}</option>
+		%end
+						</select>
+						<select class="cap_date_month" name="new_cap_date_month">
+							<option value="0">-</option>
+		%for month in range(1, 12):
+							<option value="{{month}}">{{month}}</option>
+		%end
+						</select>
+						<select class="cap_date_day" name="new_cap_date_day">
+							<option value="0">-</option>
+		%for day in range(1, 31):
+							<option value="{{day}}">{{day}}</option>
+		%end
+						</select>
+					</td>
 					<td>
 						<select class="rack" name="new_rack_id">
 							<option value="0">None</option>
 		%for rack in rack_list:
-						    <option value="{{rack.id}}">{{rack.name}}</option>
+							<option value="{{rack.id}}">{{rack.name}}</option>
 		%end
 						</select>
 					</td>
@@ -100,8 +138,8 @@
 				<td><a href="/invoice/{{machine.invoice}}">{{machine.invoice}}</a></td>
 				<td><a href="/cap_date/{{machine.cap_date}}">{{machine.cap_date}}</a></td>
 				<td style="text-align: right"><a href="/size/{{machine.get_size()}}">{{machine.get_size()}}U</a></td>
-				<td><a href="/rack/{{machine.rack_id}}"{{!'' if machine.rack.state_id == 1 else ' class="deleted"'}}>{{!machine.rack.name if machine.rack_id != 0 else 'None'}}</a></td>
-				<td style="text-align: center"><a href="/rack/{{machine.rack_id}}"{{!'' if machine.rack.state_id == 1 else ' class="deleted"'}}>{{machine.get_location()}}</a></td>
+				<td><a href="/rack/{{machine.rack_id}}">{{machine.get_rack_name()}}</a></td>
+				<td style="text-align: center"><a href="/rack/{{machine.rack_id}}">{{machine.get_location()}}</a></td>
 			</tr>
 			%end
 		</table>

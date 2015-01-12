@@ -3,6 +3,7 @@
 import sys
 import subprocess
 import commands
+import datetime
 from bottle import run, route, request, response, template, static_file, redirect, error
 from database import *
 from types import IntType, FloatType
@@ -35,9 +36,7 @@ def rack_edit():
 
 @route('/rack', method='POST')
 def rack_post():
-    new_name = ''
-    new_size = ''
-    new_order = ''
+    new = {}
     for attribute, value in request.forms.allitems():
         if value == "None":
             continue
@@ -50,18 +49,14 @@ def rack_post():
             session.query(Rack).filter_by(id = item_id).update({column_name: value})
             session.commit()
         else:
-            if column_name == 'name':
-                new_name = value
-            if column_name == 'size':
-                new_size = convert(value, IntType)
-            if column_name == 'state':
-                new_state = convert(value, IntType)
-            if column_name == 'sort':
-                new_sort = convert(value, IntType)
+            if value:
+                new[column_name] = value
+            else:
+                new[column_name] = None
 
-    if new_name and new_size and new_sort:
-        print "db insert: rack, %s, %s, new_state, %s." % (new_name, new_size, new_state, new_sort)
-        session.add(Rack(new_name, new_size, new_state, new_sort))
+    if new['name'] and new['size']:
+        print "db insert: machine: %s" % new
+        session.add(Rack(new['name'], new['size'], new['sort'], 1))
         session.commit()
 
     return rack()
@@ -95,11 +90,10 @@ def machine_sort_edit(sort):
 
 @route('/machine', method='POST')
 def machine_post():
-    new_name = ''
-    new_size = ''
-    new_order = ''
+    new = {}
     for attribute, value in request.forms.allitems():
-        if value == "None":
+        print '%s -> %s' % ( attribute, value)
+        if value == 'None':
             continue
 
         item_id = attribute.split('_', 1)[0]
@@ -110,18 +104,19 @@ def machine_post():
             session.query(Machine).filter_by(id = item_id).update({column_name: value})
             session.commit()
         else:
-            if column_name == 'name':
-                new_name = value
-            if column_name == 'size':
-                new_size = convert(value, IntType)
-            if column_name == 'state':
-                new_state = convert(value, IntType)
-            if column_name == 'sort':
-                new_sort = convert(value, IntType)
+            if value:
+                if column_name == 'cap_date':
+                    new[column_name] = datetime.date(value)
+                else:
+                    new[column_name] = value
+            else:
+                new[column_name] = None
 
-    if new_name and new_size and new_sort:
-        print "db insert: rack, %s, %s, new_state, %s." % (new_name, new_size, new_state, new_sort)
-        session.add(Rack(new_name, new_size, new_state, new_sort))
+    if new['name'] and new['model_id']:
+        print "db insert: rack, %s" % new
+        session.add(Machine(new['name'], new['serial'], new['unit_value'], new['invoice'],
+                            new['cap_date'], new['base'], new['hbase'], new['rack_id'],
+                            new['model_id'], 1))
         session.commit()
 
     return machine()

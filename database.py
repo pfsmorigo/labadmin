@@ -62,6 +62,12 @@ class Machine(Base):
         else:
             return self.get_base()+' - '+str('{:g}'.format(float(self.base+self.model.size-1)))
 
+    def get_rack_name(self):
+        if self.rack_id:
+            return self.rack.name
+        else:
+            return '-'
+
 class MachineType(Base):
     __tablename__ = 'machine_type'
     id = Column(Integer, primary_key = True)
@@ -126,7 +132,7 @@ class Rack(Base):
     sort = Column(Integer, nullable = True)
     state_id = Column(Integer, ForeignKey('state.id'))
 
-    def __init__(self, name, size, state_id, sort = None):
+    def __init__(self, name, size, sort, state_id):
         self.name = name
         self.size = size
         self.sort = sort
