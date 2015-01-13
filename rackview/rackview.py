@@ -23,7 +23,7 @@ u_height = unit_size
 if len(sys.argv) == 2:
     con = sqlite.connect(sys.argv[1])
     cursor_rack = con.cursor()
-    cursor_rack.execute("SELECT COUNT(name), MAX(size) FROM rack_list")
+    cursor_rack.execute("SELECT COUNT(name), MAX(size) FROM rackview_racks")
     rack_info = cursor_rack.fetchall()
     rack_total = rack_info[0][0]
     rack_max_size = rack_info[0][1]
@@ -40,7 +40,7 @@ if len(sys.argv) == 2:
 
     shift = border_size
 
-    cursor_rack.execute("SELECT name, size FROM rack_list")
+    cursor_rack.execute("SELECT name, size FROM rackview_racks")
     rack_rows = cursor_rack.fetchall()
     for rack_row in rack_rows:
         rack_name = rack_row[0]
@@ -73,7 +73,7 @@ if len(sys.argv) == 2:
                               class_ = "slot_number"))
 
         cursor_machine = con.cursor()
-        cursor_machine.execute("SELECT id, name, base, hbase, size, hspace, model_name, type_num, model_num, serial FROM machine_list WHERE rack_name = ?", [(rack_row[0])])
+        cursor_machine.execute("SELECT id, name, base, hbase, size, hspace, model_name, type_num, model_num, serial FROM rackview_machines WHERE rack_name = ?", [(rack_row[0])])
         machine_rows = cursor_machine.fetchall()
         for machine_row in machine_rows:
             machine_id = machine_row[0]

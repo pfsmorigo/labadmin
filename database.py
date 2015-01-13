@@ -183,25 +183,19 @@ def database_init(session):
     session.add(MachineTypeModel('Generic', '5U', None, 5, None, type.id, brand.id))
     session.flush()
 
-    session.execute("""
-            CREATE VIEW "rack_list" AS SELECT
-                    rack.*,
-                    SUM(mmm.used) AS used
-                FROM rack
-                LEFT JOIN (SELECT machine.rack_id,
-                                  MAX(machine_typemodel.size) AS used
-                           FROM machine, machine_typemodel
-                           WHERE machine.typemodel_id = machine_typemodel.rowid
-                           GROUP BY rack_id, base) AS mmm
-                ON rack.id = mmm.rack_id
-                WHERE (mmm.rack_id IS NULL OR mmm.rack_id = rack.id)
-                AND rack.state_id == 1
-                GROUP BY rack.id
-                ORDER BY sort, name COLLATE NOCASE ASC;
-            """)
+    select_string = str(rack_list(session).statement.compile(compile_kwargs = {"literal_binds": True}))
+    session.execute("CREATE VIEW rackview_racks AS "+select_string+";")
+
+#SELECT machine.*, machine_typemodel.name AS typemodel_name, machine_typemodel.type_num,
+#machine_typemodel.model_num AS model_num,
+                    #machine_typemodel.size AS size,
+                    #machine_typemodel.horizontal_space
+                #FROM machine, machine_typemodel
+                #WHERE machine.typemodel_id = machine_typemodel.id
+                #ORDER BY machine.name COLLATE NOCASE ASC
 
     session.execute("""
-            CREATE VIEW "machine_list" AS SELECT
+            CREATE VIEW "rackview_machines" AS SELECT
                     machine.id AS id,
                     machine.name,
                     machine_typemodel.id AS typemodel_id,
