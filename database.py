@@ -14,39 +14,23 @@ NOT_IN_USE = "Not in use";
 DISPOSED = "Disposed";
 INVALID = "Invalid";
 
-class Machine(Base):
-    __tablename__ = 'machine'
+class Equipment(Base):
+    __tablename__ = 'equipment'
     id = Column(Integer, primary_key = True)
     name = Column(String(250), nullable = False)
-    serial = Column(String(250), nullable = True)
-    unit_value = Column(Float, nullable = True)
-    invoice = Column(String(50), nullable = True)
-    cap_date = Column(Date, nullable = True)
-    base = Column(Float, nullable = True)
-    hbase = Column(Float, nullable = True)
-    rack_id = Column(Integer, ForeignKey('rack.id'))
-    typemodel_id = Column(Integer, ForeignKey('machine_typemodel.id'))
+    type_model_id = Column(Integer, ForeignKey('type_model.id'))
     state_id = Column(Integer, ForeignKey('state.id'))
 
-    model = relationship('MachineTypeModel')
-    rack = relationship('Rack')
+    type_model = relationship('TypeModel')
     state = relationship('State')
 
-    def __init__(self, name, serial, unit_value, invoice, cap_date,
-            base, hbase, rack_id, model_id, state_id):
+    def __init__(self, name, type_model_id, state_id):
         self.name = name
-        self.serial = serial
-        self.unit_value = unit_value
-        self.invoice = invoice
-        self.cap_date = cap_date
-        self.base = base
-        self.hbase = hbase
-        self.rack_id = rack_id
-        self.model_id = model_id
+        self.type_model_id = type_model_id
         self.state_id = state_id
 
     def __repr__(self):
-        return "<Machine('%s')>" % self.name
+        return "<Equipment('%s')>" % self.name
 
     def get_base(self):
         return str('{:g}'.format(float(self.base)))
@@ -62,35 +46,53 @@ class Machine(Base):
         else:
             return self.get_base()+' - '+str('{:g}'.format(float(self.base+self.model.size-1)))
 
-    def get_rack_name(self):
-        if self.rack_id:
-            return self.rack.name
-        else:
-            return '-'
+class EquipmentFieldType(Base):
+    __tablename__ = 'equipment_field_type'
+    id = Column(Integer, primary_key = True)
+    name = Column(String(250), nullable = False)
 
-class MachineTypeModel(Base):
-    __tablename__ = 'machine_typemodel'
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return "<EquipmentFieldType('%s')>" % self.name
+
+class EquipmentField(Base):
+    __tablename__ = 'equipment_field'
+    id = Column(Integer, primary_key = True)
+    description = Column(String(250), nullable = False)
+    equipment_id = Column(Integer, ForeignKey('equipment.id'))
+
+    def __init__(self, description, equipment_id):
+        self.description = description
+        self.equipment_id = equipment_id
+
+    def __repr__(self):
+        return "<EquipmentFieldType('%s')>" % self.description
+
+class TypeModel(Base):
+    __tablename__ = 'type_model'
     id = Column(Integer, primary_key = True)
     name = Column(String(250), nullable = False)
     type_num = Column(String(100), nullable = True)
     model_num = Column(String(100), nullable = True)
     size = Column(Float, nullable = True)
     horizontal_space = Column(Float, nullable = True)
-    category_id = Column(Integer, ForeignKey('machine_category.id'))
+    category_id = Column(Integer, ForeignKey('category.id'))
     brand_id = Column(Integer, ForeignKey('brand.id'))
 
     def __init__(self, name, type_num, model_num, size, horizontal_space,
-            type_id, brand_id):
+            category_id, brand_id):
         self.name = name
         self.type_num = type_num
         self.model_num = model_num
         self.size = size
         self.horizontal_space = horizontal_space
-        self.type_id = type_id
+        self.category_id = category_id
         self.brand_id = brand_id
 
     def __repr__(self):
-        return "<MachineTypeModel('%s')>" % self.name
+        return "<TypeModel('%s')>" % self.name
 
     def get_description(self):
         if self.type_num == None and self.model_num == None:
@@ -112,8 +114,8 @@ class MachineTypeModel(Base):
         else:
             return self.type_num+'-'+self.model_num
 
-class MachineCategory(Base):
-    __tablename__ = 'machine_category'
+class Category(Base):
+    __tablename__ = 'category'
     id = Column(Integer, primary_key = True)
     name = Column(String(100), nullable = False)
 
@@ -121,24 +123,37 @@ class MachineCategory(Base):
         self.name = name
 
     def __repr__(self):
-        return "<MachineCategory('%s')>" % self.name
+        return "<Category('%s')>" % self.name
 
-class Rack(Base):
-    __tablename__ = 'rack'
+class MachineRack(Base):
+    __tablename__ = 'machine_rack'
     id = Column(Integer, primary_key = True)
-    name = Column(String(250), nullable = False)
-    size = Column(Integer, nullable = False)
-    sort = Column(Integer, nullable = True)
-    state_id = Column(Integer, ForeignKey('state.id'))
+    base = Column(Float, nullable = True)
+    hbase = Column(Float, nullable = True)
+    machine_id = Column(Integer, ForeignKey('equipment.id'))
+    rack_id = Column(Integer, ForeignKey('equipment.id'))
 
-    def __init__(self, name, size, sort, state_id):
-        self.name = name
-        self.size = size
-        self.sort = sort
-        self.state_id = state_id
+    def __init__(self, base, hbase, machine_id, rack_id):
+        self.base = base
+        self.hbase = hbase
+        self.machine_id = machine_id
+        self.rack_id = rack_id
 
     def __repr__(self):
-        return "<Rack('%s')>" % self.name
+        return "<MachineRack('%u, %u')>" % (self.machine_id, self.rack_id)
+
+class RackOrder(Base):
+    __tablename__ = 'rack_order'
+    id = Column(Integer, primary_key = True)
+    sort = Column(Integer, nullable = False)
+    rack_id = Column(Integer, ForeignKey('equipment.id'))
+
+    def __init__(self, sort, rack_id):
+        self.sort = sort
+        self.rack_id = rack_id
+
+    def __repr__(self):
+        return "<RackOrder('%s')>" % self.sort
 
 class Brand(Base):
     __tablename__ = 'brand'
@@ -162,6 +177,32 @@ class State(Base):
     def __repr__(self):
         return "<State('%s')>" % self.name
 
+class Event(Base):
+    __tablename__ = 'event'
+    id = Column(Integer, primary_key = True)
+    description = Column(String(250), nullable = True)
+    equipment_id = Column(Integer, ForeignKey('equipment.id'))
+    event_type_id = Column(Integer, ForeignKey('event_type.id'))
+
+    def __init__(self, description, event_type_id, equipment_id):
+        self.description = description
+        self.event_type_id = event_type_id
+        self.equipment_id = equipment_id
+
+    def __repr__(self):
+        return "<Event('%s')>" % self.description
+
+class EventType(Base):
+    __tablename__ = 'event_type'
+    id = Column(Integer, primary_key = True)
+    name = Column(String(250), nullable = False)
+
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return "<EventType('%s')>" % self.name
+
 def database_init(session):
     session.add(State(IN_USE))
     session.add(State(NOT_IN_USE))
@@ -172,19 +213,24 @@ def database_init(session):
     session.add(Brand('Generic'))
     session.flush()
 
-    type = MachineCategory('Generic')
-    session.add(MachineCategory('Generic'))
+    category_rack = Category('Rack')
+    category_machine = Category('Machine')
+    session.add(category_rack)
+    session.add(category_machine)
     session.flush()
 
-    session.add(MachineTypeModel('Generic', '1U', None, 1, None, type.id, brand.id))
-    session.add(MachineTypeModel('Generic', '2U', None, 2, None, type.id, brand.id))
-    session.add(MachineTypeModel('Generic', '3U', None, 3, None, type.id, brand.id))
-    session.add(MachineTypeModel('Generic', '4U', None, 4, None, type.id, brand.id))
-    session.add(MachineTypeModel('Generic', '5U', None, 5, None, type.id, brand.id))
+    session.add(TypeModel('Generic rack', '11U', None, 11, None, category_rack.id, brand.id))
+    session.add(TypeModel('Generic rack', '25U', None, 25, None, category_rack.id, brand.id))
+    session.add(TypeModel('Generic rack', '42U', None, 42, None, category_rack.id, brand.id))
+    session.add(TypeModel('Generic machine', '1U', None, 1, None, category_machine.id, brand.id))
+    session.add(TypeModel('Generic machine', '2U', None, 2, None, category_machine.id, brand.id))
+    session.add(TypeModel('Generic machine', '3U', None, 3, None, category_machine.id, brand.id))
+    session.add(TypeModel('Generic machine', '4U', None, 4, None, category_machine.id, brand.id))
+    session.add(TypeModel('Generic machine', '5U', None, 5, None, category_machine.id, brand.id))
     session.flush()
 
-    select_string = str(rack_list(session).statement.compile(compile_kwargs = {"literal_binds": True}))
-    session.execute("CREATE VIEW rackview_racks AS "+select_string+";")
+    #select_string = str(rack_list(session).statement.compile(compile_kwargs = {"literal_binds": True}))
+    #session.execute("CREATE VIEW rackview_racks AS "+select_string+";")
 
 #SELECT machine.*, machine_typemodel.name AS typemodel_name, machine_typemodel.type_num,
 #machine_typemodel.model_num AS model_num,
@@ -194,35 +240,35 @@ def database_init(session):
                 #WHERE machine.typemodel_id = machine_typemodel.id
                 #ORDER BY machine.name COLLATE NOCASE ASC
 
-    session.execute("""
-            CREATE VIEW "rackview_machines" AS SELECT
-                    machine.id AS id,
-                    machine.name,
-                    machine_typemodel.id AS typemodel_id,
-                    machine_typemodel.name AS model_name,
-                    machine_typemodel.category_id AS category_id,
-                    machine_typemodel.type_num AS type_num,
-                    machine_typemodel.model_num AS model_num,
-                    machine_typemodel.size AS size,
-                    machine_typemodel.horizontal_space AS hspace,
-                    machine.serial AS serial,
-                    machine.unit_value AS unit_value,
-                    machine.invoice AS invoice,
-                    machine.cap_date AS cap_date,
-                    machine.rack_id AS rack_id,
-                    rack.name AS rack_name,
-                    rack.sort AS rack_sort,
-                    rack.state_id AS rack_state_id,
-                    machine.base,
-                    machine.hbase,
-                    machine.state_id
-                FROM machine, machine_typemodel
-                LEFT OUTER JOIN rack
-                WHERE (machine.rack_id IS 0 OR machine.rack_id = rack.rowid)
-                AND machine.typemodel_id = machine_typemodel.id
-                GROUP BY machine.id
-                ORDER BY machine.name COLLATE NOCASE ASC;
-            """)
+    #session.execute("""
+            #CREATE VIEW "rackview_machines" AS SELECT
+                    #machine.id AS id,
+                    #machine.name,
+                    #machine_typemodel.id AS typemodel_id,
+                    #machine_typemodel.name AS model_name,
+                    #machine_typemodel.category_id AS category_id,
+                    #machine_typemodel.type_num AS type_num,
+                    #machine_typemodel.model_num AS model_num,
+                    #machine_typemodel.size AS size,
+                    #machine_typemodel.horizontal_space AS hspace,
+                    #machine.serial AS serial,
+                    #machine.unit_value AS unit_value,
+                    #machine.invoice AS invoice,
+                    #machine.cap_date AS cap_date,
+                    #machine.rack_id AS rack_id,
+                    #rack.name AS rack_name,
+                    #rack.sort AS rack_sort,
+                    #rack.state_id AS rack_state_id,
+                    #machine.base,
+                    #machine.hbase,
+                    #machine.state_id
+                #FROM machine, machine_typemodel
+                #LEFT OUTER JOIN rack
+                #WHERE (machine.rack_id IS 0 OR machine.rack_id = rack.rowid)
+                #AND machine.typemodel_id = machine_typemodel.id
+                #GROUP BY machine.id
+                #ORDER BY machine.name COLLATE NOCASE ASC;
+            #""")
 
     session.commit()
 
@@ -241,21 +287,13 @@ def database_example(session):
     session.add(brand)
     session.flush()
 
-    machine_category_server = MachineCategory('Server')
-    machine_category_network = MachineCategory('Network')
-    machine_category_storage = MachineCategory('Storage')
-    session.add(machine_category_server)
-    session.add(machine_category_network)
-    session.add(machine_category_storage)
-    session.flush()
-
-    machine_typemodel_server = MachineTypeModel('Server', None, None, 2, None,
+    machine_typemodel_server = TypeModel('Server', None, None, 2, None,
             machine_category_server.id, brand.id)
-    machine_typemodel_big_server = MachineTypeModel('Big Server', None, None, 5, None,
+    machine_typemodel_big_server = TypeModel('Big Server', None, None, 5, None,
             machine_category_server.id, brand.id)
-    machine_typemodel_switch = MachineTypeModel('Switch', None, None, 1, None,
+    machine_typemodel_switch = TypeModel('Switch', None, None, 1, None,
             machine_category_network.id, brand.id)
-    machine_typemodel_desktop = MachineTypeModel('Desktop', None, None, 8.5, 0.3,
+    machine_typemodel_desktop = TypeModel('Desktop', None, None, 8.5, 0.3,
             machine_category_network.id, brand.id)
     session.add(machine_typemodel_server)
     session.add(machine_typemodel_big_server)
@@ -321,7 +359,7 @@ def rack_list(session):
     return query
 
 def machine_typemodel_list(session):
-    query = session.query(MachineTypeModel).order_by(collate(MachineTypeModel.name, 'NOCASE'))
+    query = session.query(TypeModel).order_by(collate(TypeModel.name, 'NOCASE'))
     return query
 
 def machine_list(session, id = '', sort = ''):
@@ -331,15 +369,14 @@ def machine_list(session, id = '', sort = ''):
 session = get_session()
 if session.query(State).count() == 0:
     database_init(session)
-    database_example(session)
+    #database_example(session)
 
 print ""
 print "labadmin"
 print "--------"
-print "%5u racks" % session.query(Rack.id).count()
-print "%5u machines" % session.query(Machine.id).count()
-print "%5u machine models" % session.query(MachineTypeModel.id).count()
-print "%5u machine categories" % session.query(MachineCategory.id).count()
-print "%5u brands" % session.query(Brand.id).count()
-print "%5u states" % session.query(State.id).count()
+print "  equipments ... %u" % session.query(Equipment.id).count()
+print "  type models .. %u" % session.query(TypeModel.id).count()
+print "  categories ... %u" % session.query(Category.id).count()
+print "  brands ....... %u" % session.query(Brand.id).count()
+print "  states ....... %u" % session.query(State.id).count()
 print ""
