@@ -204,29 +204,21 @@ class EventType(Base):
         return "<EventType('%s')>" % self.name
 
 def database_init(session):
-    session.add(State(IN_USE))
-    session.add(State(NOT_IN_USE))
-    session.add(State(DISPOSED))
-    session.add(State(INVALID))
-
-    brand = Brand('Generic')
-    session.add(Brand('Generic'))
-    session.flush()
+    session.add_all([State(IN_USE), State(NOT_IN_USE), State(DISPOSED), State(INVALID)])
 
     category_rack = Category('Rack')
     category_machine = Category('Machine')
-    session.add(category_rack)
-    session.add(category_machine)
+    session.add_all([category_rack, category_machine])
     session.flush()
 
-    session.add(TypeModel('Generic rack', '11U', None, 11, None, category_rack.id, brand.id))
-    session.add(TypeModel('Generic rack', '25U', None, 25, None, category_rack.id, brand.id))
-    session.add(TypeModel('Generic rack', '42U', None, 42, None, category_rack.id, brand.id))
-    session.add(TypeModel('Generic machine', '1U', None, 1, None, category_machine.id, brand.id))
-    session.add(TypeModel('Generic machine', '2U', None, 2, None, category_machine.id, brand.id))
-    session.add(TypeModel('Generic machine', '3U', None, 3, None, category_machine.id, brand.id))
-    session.add(TypeModel('Generic machine', '4U', None, 4, None, category_machine.id, brand.id))
-    session.add(TypeModel('Generic machine', '5U', None, 5, None, category_machine.id, brand.id))
+    session.add(TypeModel('Generic rack', '11U', None, 11, None, category_rack.id, None))
+    session.add(TypeModel('Generic rack', '25U', None, 25, None, category_rack.id, None))
+    session.add(TypeModel('Generic rack', '42U', None, 42, None, category_rack.id, None))
+    session.add(TypeModel('Generic machine', '1U', None, 1, None, category_machine.id, None))
+    session.add(TypeModel('Generic machine', '2U', None, 2, None, category_machine.id, None))
+    session.add(TypeModel('Generic machine', '3U', None, 3, None, category_machine.id, None))
+    session.add(TypeModel('Generic machine', '4U', None, 4, None, category_machine.id, None))
+    session.add(TypeModel('Generic machine', '5U', None, 5, None, category_machine.id, None))
     session.flush()
 
     #select_string = str(rack_list(session).statement.compile(compile_kwargs = {"literal_binds": True}))
@@ -282,10 +274,7 @@ def database_example(session):
     machine_2u = session.query(TypeModel).filter(TypeModel.category_id == machine, TypeModel.size == 2).first().id
     machine_5u = session.query(TypeModel).filter(TypeModel.category_id == machine, TypeModel.size == 5).first().id
 
-    elves = Equipment('Elves', rack_25u, state_in_use)
-    men = Equipment('Men', rack_25u, state_in_use)
-    dwarves = Equipment('Dwarves', rack_11u, state_in_use)
-
+    elves = Equipment('elves', rack_25u, state_in_use)
     legolas = Equipment('legolas', machine_1u, state_in_use)
     finwe = Equipment('finwe', machine_1u, state_in_use)
     celeborn = Equipment('celeborn', machine_1u, state_in_use)
@@ -294,6 +283,7 @@ def database_example(session):
     turgon = Equipment('turgon', machine_1u, state_in_use)
     galadriel = Equipment('galadriel', machine_1u, state_in_use)
 
+    men = Equipment('men', rack_25u, state_in_use)
     boromir = Equipment('boromir', machine_1u, state_in_use)
     aragorn = Equipment('aragorn', machine_1u, state_in_use)
     faramir = Equipment('faramir', machine_1u, state_in_use)
@@ -302,6 +292,7 @@ def database_example(session):
     beren = Equipment('beren', machine_1u, state_in_use)
     denethor = Equipment('denethor', machine_1u, state_in_use)
 
+    dwarves = Equipment('dwarves', rack_11u, state_in_use)
     hurin = Equipment('hurin', machine_1u, state_in_use)
     egalmoth = Equipment('egalmoth', machine_1u, state_in_use)
     bofur = Equipment('bofur', machine_1u, state_in_use)
@@ -311,11 +302,9 @@ def database_example(session):
     balin = Equipment('balin', machine_1u, state_in_use)
     gloin = Equipment('gloin', machine_1u, state_in_use)
 
-    session.add_all([elves, men, dwarves,
-                     legolas, finwe, celeborn, tuor, elros, turgon, galadriel,
-                     boromir, aragorn, faramir, turgon, turin, beren, denethor,
-                     hurin, egalmoth, bofur, thorin, oin, dori, balin, gloin])
-
+    session.add_all([elves, legolas, finwe, celeborn, tuor, elros, turgon, galadriel,
+                     men, boromir, aragorn, faramir, turgon, turin, beren, denethor,
+                     dwarves, hurin, egalmoth, bofur, thorin, oin, dori, balin, gloin])
     session.flush()
     session.commit()
 
@@ -346,9 +335,9 @@ if session.query(State).count() == 0:
 print ""
 print "labadmin"
 print "--------"
-print "  equipments ... %u" % session.query(Equipment.id).count()
-print "  type models .. %u" % session.query(TypeModel.id).count()
-print "  categories ... %u" % session.query(Category.id).count()
-print "  brands ....... %u" % session.query(Brand.id).count()
-print "  states ....... %u" % session.query(State.id).count()
+print "  equipments ... %2u" % session.query(Equipment.id).count()
+print "  type models .. %2u" % session.query(TypeModel.id).count()
+print "  categories ... %2u" % session.query(Category.id).count()
+print "  brands ....... %2u" % session.query(Brand.id).count()
+print "  states ....... %2u" % session.query(State.id).count()
 print ""
