@@ -10,5 +10,6 @@ Dependencies
 ------------
 
  * python-bottle
+ * python-sqlalchemy
  * python-svgwrite
 
