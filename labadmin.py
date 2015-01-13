@@ -66,7 +66,7 @@ def machine(view = '', id = '', sort = ''):
     return template('machine', info = info, view = view, sort = sort,
             machine_list = machine_list(session, id, sort),
             rack_list = rack_list(session),
-            machine_model_list = machine_model_list(session))
+            machine_typemodel_list = machine_typemodel_list(session))
 
 @route('/machine/edit')
 def machine_edit():
