@@ -25,10 +25,10 @@ class Machine(Base):
     base = Column(Float, nullable = True)
     hbase = Column(Float, nullable = True)
     rack_id = Column(Integer, ForeignKey('rack.id'))
-    model_id = Column(Integer, ForeignKey('machine_model.id'))
+    typemodel_id = Column(Integer, ForeignKey('machine_typemodel.id'))
     state_id = Column(Integer, ForeignKey('state.id'))
 
-    model = relationship('MachineModel')
+    model = relationship('MachineTypeModel')
     rack = relationship('Rack')
     state = relationship('State')
 
@@ -68,26 +68,15 @@ class Machine(Base):
         else:
             return '-'
 
-class MachineType(Base):
-    __tablename__ = 'machine_type'
-    id = Column(Integer, primary_key = True)
-    name = Column(String(100), nullable = False)
-
-    def __init__(self, name):
-        self.name = name
-
-    def __repr__(self):
-        return "<MachineType('%s')>" % self.name
-
-class MachineModel(Base):
-    __tablename__ = 'machine_model'
+class MachineTypeModel(Base):
+    __tablename__ = 'machine_typemodel'
     id = Column(Integer, primary_key = True)
     name = Column(String(250), nullable = False)
     type_num = Column(String(100), nullable = True)
     model_num = Column(String(100), nullable = True)
     size = Column(Float, nullable = True)
     horizontal_space = Column(Float, nullable = True)
-    type_id = Column(Integer, ForeignKey('machine_type.id'))
+    category_id = Column(Integer, ForeignKey('machine_category.id'))
     brand_id = Column(Integer, ForeignKey('brand.id'))
 
     def __init__(self, name, type_num, model_num, size, horizontal_space,
@@ -101,7 +90,7 @@ class MachineModel(Base):
         self.brand_id = brand_id
 
     def __repr__(self):
-        return "<MachineModel('%s')>" % self.name
+        return "<MachineTypeModel('%s')>" % self.name
 
     def get_description(self):
         if self.type_num == None and self.model_num == None:
@@ -123,6 +112,16 @@ class MachineModel(Base):
         else:
             return self.type_num+'-'+self.model_num
 
+class MachineCategory(Base):
+    __tablename__ = 'machine_category'
+    id = Column(Integer, primary_key = True)
+    name = Column(String(100), nullable = False)
+
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return "<MachineCategory('%s')>" % self.name
 
 class Rack(Base):
     __tablename__ = 'rack'
@@ -173,15 +172,15 @@ def database_init(session):
     session.add(Brand('Generic'))
     session.flush()
 
-    type = MachineType('Generic')
-    session.add(MachineType('Generic'))
+    type = MachineCategory('Generic')
+    session.add(MachineCategory('Generic'))
     session.flush()
 
-    session.add(MachineModel('Generic', '1U', None, 1, None, type.id, brand.id))
-    session.add(MachineModel('Generic', '2U', None, 2, None, type.id, brand.id))
-    session.add(MachineModel('Generic', '3U', None, 3, None, type.id, brand.id))
-    session.add(MachineModel('Generic', '4U', None, 4, None, type.id, brand.id))
-    session.add(MachineModel('Generic', '5U', None, 5, None, type.id, brand.id))
+    session.add(MachineTypeModel('Generic', '1U', None, 1, None, type.id, brand.id))
+    session.add(MachineTypeModel('Generic', '2U', None, 2, None, type.id, brand.id))
+    session.add(MachineTypeModel('Generic', '3U', None, 3, None, type.id, brand.id))
+    session.add(MachineTypeModel('Generic', '4U', None, 4, None, type.id, brand.id))
+    session.add(MachineTypeModel('Generic', '5U', None, 5, None, type.id, brand.id))
     session.flush()
 
     session.execute("""
@@ -190,9 +189,9 @@ def database_init(session):
                     SUM(mmm.used) AS used
                 FROM rack
                 LEFT JOIN (SELECT machine.rack_id,
-                                  MAX(machine_model.size) AS used
-                           FROM machine, machine_model
-                           WHERE machine.model_id = machine_model.rowid
+                                  MAX(machine_typemodel.size) AS used
+                           FROM machine, machine_typemodel
+                           WHERE machine.typemodel_id = machine_typemodel.rowid
                            GROUP BY rack_id, base) AS mmm
                 ON rack.id = mmm.rack_id
                 WHERE (mmm.rack_id IS NULL OR mmm.rack_id = rack.id)
@@ -205,13 +204,13 @@ def database_init(session):
             CREATE VIEW "machine_list" AS SELECT
                     machine.id AS id,
                     machine.name,
-                    machine_model.id AS model_id,
-                    machine_model.name AS model_name,
-                    machine_model.type_id AS type_id,
-                    machine_model.type_num AS type_num,
-                    machine_model.model_num AS model_num,
-                    machine_model.size AS size,
-                    machine_model.horizontal_space AS hspace,
+                    machine_typemodel.id AS typemodel_id,
+                    machine_typemodel.name AS model_name,
+                    machine_typemodel.category_id AS category_id,
+                    machine_typemodel.type_num AS type_num,
+                    machine_typemodel.model_num AS model_num,
+                    machine_typemodel.size AS size,
+                    machine_typemodel.horizontal_space AS hspace,
                     machine.serial AS serial,
                     machine.unit_value AS unit_value,
                     machine.invoice AS invoice,
@@ -223,10 +222,10 @@ def database_init(session):
                     machine.base,
                     machine.hbase,
                     machine.state_id
-                FROM machine, machine_model
+                FROM machine, machine_typemodel
                 LEFT OUTER JOIN rack
                 WHERE (machine.rack_id IS 0 OR machine.rack_id = rack.rowid)
-                AND machine.model_id = machine_model.id
+                AND machine.typemodel_id = machine_typemodel.id
                 GROUP BY machine.id
                 ORDER BY machine.name COLLATE NOCASE ASC;
             """)
@@ -254,64 +253,64 @@ def database_example(session):
     session.add(machine_type_storage)
     session.flush()
 
-    machine_model_server = MachineModel('Server', None, None, 2, None,
+    machine_typemodel_server = MachineTypeModel('Server', None, None, 2, None,
             machine_type_server.id, brand.id)
-    machine_model_big_server = MachineModel('Big Server', None, None, 5, None,
+    machine_typemodel_big_server = MachineTypeModel('Big Server', None, None, 5, None,
             machine_type_server.id, brand.id)
-    machine_model_switch = MachineModel('Switch', None, None, 1, None,
+    machine_typemodel_switch = MachineTypeModel('Switch', None, None, 1, None,
             machine_type_network.id, brand.id)
-    machine_model_desktop = MachineModel('Desktop', None, None, 8.5, 0.3,
+    machine_typemodel_desktop = MachineTypeModel('Desktop', None, None, 8.5, 0.3,
             machine_type_network.id, brand.id)
-    session.add(machine_model_server)
-    session.add(machine_model_big_server)
-    session.add(machine_model_switch)
-    session.add(machine_model_desktop)
+    session.add(machine_typemodel_server)
+    session.add(machine_typemodel_big_server)
+    session.add(machine_typemodel_switch)
+    session.add(machine_typemodel_desktop)
     session.flush()
 
     session.add(Machine('Legolas', None, None, None, None, 30, None,
-        rack_elves.id, machine_model_switch.id, 1))
+        rack_elves.id, machine_typemodel_switch.id, 1))
     session.add(Machine('Finwe', None, None, None, None, 23.5, None,
-        rack_elves.id, machine_model_big_server.id, 1))
+        rack_elves.id, machine_typemodel_big_server.id, 1))
     session.add(Machine('Celeborn', None, None, None, None, 21, None,
-        rack_elves.id, machine_model_server.id, 1))
+        rack_elves.id, machine_typemodel_server.id, 1))
     session.add(Machine('Tuor', None, None, None, None, 11, 0.15,
-        rack_elves.id, machine_model_desktop.id, 1))
+        rack_elves.id, machine_typemodel_desktop.id, 1))
     session.add(Machine('Elros', None, None, None, None, 11, 0.55,
-        rack_elves.id, machine_model_desktop.id, 1))
+        rack_elves.id, machine_typemodel_desktop.id, 1))
     session.add(Machine('Turgon', None, None, None, None, 6, None,
-        rack_elves.id, machine_model_server.id, 1))
+        rack_elves.id, machine_typemodel_server.id, 1))
     session.add(Machine('Galadriel', None, None, None, None, 1, None,
-        rack_elves.id, machine_model_big_server.id, 1))
+        rack_elves.id, machine_typemodel_big_server.id, 1))
     session.add(Machine('Boromir', None, None, None, None, 30, None,
-        rack_men.id, machine_model_switch.id, 1))
+        rack_men.id, machine_typemodel_switch.id, 1))
     session.add(Machine('Aragorn', None, None, None, None, 28, None,
-        rack_men.id, machine_model_server.id, 1))
+        rack_men.id, machine_typemodel_server.id, 1))
     session.add(Machine('Faramir', None, None, None, None, 26, None,
-        rack_men.id, machine_model_server.id, 1))
+        rack_men.id, machine_typemodel_server.id, 1))
     session.add(Machine('Turgon', None, None, None, None, 20, None,
-        rack_men.id, machine_model_big_server.id, 1))
+        rack_men.id, machine_typemodel_big_server.id, 1))
     session.add(Machine('Turin', None, None, None, None, 15, None,
-        rack_men.id, machine_model_big_server.id, 1))
+        rack_men.id, machine_typemodel_big_server.id, 1))
     session.add(Machine('Beren', None, None, None, None, 10, None,
-        rack_men.id, machine_model_big_server.id, 1))
+        rack_men.id, machine_typemodel_big_server.id, 1))
     session.add(Machine('Denethor', None, None, None, None, 8, None,
-        rack_men.id, machine_model_server.id, 1))
+        rack_men.id, machine_typemodel_server.id, 1))
     session.add(Machine('Hurin', None, None, None, None, 6, None,
-        rack_men.id, machine_model_server.id, 1))
+        rack_men.id, machine_typemodel_server.id, 1))
     session.add(Machine('Egalmoth', None, None, None, None, 1, None,
-        rack_men.id, machine_model_big_server.id, 1))
+        rack_men.id, machine_typemodel_big_server.id, 1))
     session.add(Machine('Bofur', None, None, None, None, 18, None,
-        rack_dwarves.id, machine_model_server.id, 1))
+        rack_dwarves.id, machine_typemodel_server.id, 1))
     session.add(Machine('Thorin', None, None, None, None, 16, None,
-        rack_dwarves.id, machine_model_server.id, 1))
+        rack_dwarves.id, machine_typemodel_server.id, 1))
     session.add(Machine('Oin', None, None, None, None, 10, None,
-        rack_dwarves.id, machine_model_server.id, 1))
+        rack_dwarves.id, machine_typemodel_server.id, 1))
     session.add(Machine('Dori', None, None, None, None, 6, None,
-        rack_dwarves.id, machine_model_server.id, 1))
+        rack_dwarves.id, machine_typemodel_server.id, 1))
     session.add(Machine('Balin', None, None, None, None, 4, None,
-        rack_dwarves.id, machine_model_server.id, 1))
+        rack_dwarves.id, machine_typemodel_server.id, 1))
     session.add(Machine('Gloin', None, None, None, None, 1, None,
-        rack_dwarves.id, machine_model_server.id, 1))
+        rack_dwarves.id, machine_typemodel_server.id, 1))
     session.commit()
 
 def get_session():
@@ -325,8 +324,8 @@ def rack_list(session):
     #print str(query.statement.compile())
     return query
 
-def machine_model_list(session):
-    query = session.query(MachineModel).order_by(collate(MachineModel.name, 'NOCASE'))
+def machine_typemodel_list(session):
+    query = session.query(MachineTypeModel).order_by(collate(MachineTypeModel.name, 'NOCASE'))
     return query
 
 def machine_list(session, id = '', sort = ''):
@@ -343,8 +342,8 @@ print "labadmin"
 print "--------"
 print "%5u racks" % session.query(Rack.id).count()
 print "%5u machines" % session.query(Machine.id).count()
-print "%5u machine models" % session.query(MachineModel.id).count()
-print "%5u machine types" % session.query(MachineType.id).count()
+print "%5u machine models" % session.query(MachineTypeModel.id).count()
+print "%5u machine categories" % session.query(MachineCategory.id).count()
 print "%5u brands" % session.query(Brand.id).count()
 print "%5u states" % session.query(State.id).count()
 print ""
