@@ -3,7 +3,7 @@
 import os
 import sys
 from sqlalchemy import Column, ForeignKey, Integer, String, Float, Boolean, Date
-from sqlalchemy import create_engine, event, func, collate, and_, or_
+from sqlalchemy import create_engine, event, func, collate, and_, or_, sql
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker, aliased
 
@@ -204,11 +204,12 @@ class EventType(Base):
         return "<EventType('%s')>" % self.name
 
 def database_init(session):
-    session.add_all([State(IN_USE), State(NOT_IN_USE), State(DISPOSED), State(INVALID)])
-
+    state_in_use = State(IN_USE)
     category_rack = Category('Rack')
     category_machine = Category('Machine')
-    session.add_all([category_rack, category_machine])
+
+    session.add_all([state_in_use, State(NOT_IN_USE), State(DISPOSED), State(INVALID),
+                     category_rack, category_machine])
     session.flush()
 
     session.add(TypeModel('Generic rack', '11U', None, 11, None, category_rack.id, None))
@@ -221,46 +222,45 @@ def database_init(session):
     session.add(TypeModel('Generic machine', '5U', None, 5, None, category_machine.id, None))
     session.flush()
 
-    #select_string = str(rack_list(session).statement.compile(compile_kwargs = {"literal_binds": True}))
-    #session.execute("CREATE VIEW rackview_racks AS "+select_string+";")
+    Machine = aliased(Equipment, name='machine')
+    Rack = aliased(Equipment, name='rack')
 
-#SELECT machine.*, machine_typemodel.name AS typemodel_name, machine_typemodel.type_num,
-#machine_typemodel.model_num AS model_num,
-                    #machine_typemodel.size AS size,
-                    #machine_typemodel.horizontal_space
-                #FROM machine, machine_typemodel
-                #WHERE machine.typemodel_id = machine_typemodel.id
-                #ORDER BY machine.name COLLATE NOCASE ASC
+    query_rack = session.query(Rack.id.label('id'),
+                               Rack.name.label('name'),
+                               TypeModel.size.label('size'),
+                               TypeModel.horizontal_space.label('horizontal_space'),
+                               Category.name.label('category'),
+                               sql.null().label('rack'),
+                               sql.null().label('base'),
+                               sql.null().label('hbase')
+                               ).filter(Rack.type_model_id == TypeModel.id,
+                                        TypeModel.category_id == Category.id,
+                                        Rack.state_id == state_in_use.id,
+                                        Category.id == category_rack.id)
 
-    #session.execute("""
-            #CREATE VIEW "rackview_machines" AS SELECT
-                    #machine.id AS id,
-                    #machine.name,
-                    #machine_typemodel.id AS typemodel_id,
-                    #machine_typemodel.name AS model_name,
-                    #machine_typemodel.category_id AS category_id,
-                    #machine_typemodel.type_num AS type_num,
-                    #machine_typemodel.model_num AS model_num,
-                    #machine_typemodel.size AS size,
-                    #machine_typemodel.horizontal_space AS hspace,
-                    #machine.serial AS serial,
-                    #machine.unit_value AS unit_value,
-                    #machine.invoice AS invoice,
-                    #machine.cap_date AS cap_date,
-                    #machine.rack_id AS rack_id,
-                    #rack.name AS rack_name,
-                    #rack.sort AS rack_sort,
-                    #rack.state_id AS rack_state_id,
-                    #machine.base,
-                    #machine.hbase,
-                    #machine.state_id
-                #FROM machine, machine_typemodel
-                #LEFT OUTER JOIN rack
-                #WHERE (machine.rack_id IS 0 OR machine.rack_id = rack.rowid)
-                #AND machine.typemodel_id = machine_typemodel.id
-                #GROUP BY machine.id
-                #ORDER BY machine.name COLLATE NOCASE ASC;
-            #""")
+    query_machine = session.query(Machine.id.label('id'),
+                                  Machine.name.label('name'),
+                                  TypeModel.size.label('size'),
+                                  TypeModel.horizontal_space.label('horizontal_space'),
+                                  Category.name.label('category'),
+                                  Rack.name.label('rack'),
+                                  MachineRack.base,
+                                  MachineRack.hbase
+                                  ).filter(Machine.type_model_id == TypeModel.id,
+                                           TypeModel.category_id == Category.id,
+                                           Machine.state_id == state_in_use.id,
+                                           Rack.state_id == state_in_use.id,
+                                           MachineRack.machine_id == Machine.id,
+                                           MachineRack.rack_id == Rack.id
+                                           )
+                                  #.order_by(MachineRack.base.desc(),
+                                                      #collate(Machine.name, 'NOCASE'))
+
+    query = query_rack.union(query_machine)
+    #query = aliased(query_union, name='all')
+    select_string = str(query.statement.compile().statement.compile(compile_kwargs = {"literal_binds": True}))
+    print select_string
+    session.execute("CREATE VIEW rackview AS "+select_string+";")
 
     session.commit()
 
@@ -332,6 +332,7 @@ def database_example(session):
     session.add(MachineRack(1, None, balin.id, dwarves.id))
     session.add(MachineRack(1, None, gloin.id, dwarves.id))
 
+    session.flush()
     session.commit()
 
 def get_session():
