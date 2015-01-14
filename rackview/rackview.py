@@ -23,7 +23,7 @@ u_height = unit_size
 if len(sys.argv) == 2:
     con = sqlite.connect(sys.argv[1])
     cursor_rack = con.cursor()
-    cursor_rack.execute("SELECT COUNT(name), MAX(size) FROM rackview_racks")
+    cursor_rack.execute("SELECT COUNT(name), MAX(size) FROM rackview WHERE category = 'Rack'")
     rack_info = cursor_rack.fetchall()
     rack_total = rack_info[0][0]
     rack_max_size = rack_info[0][1]
@@ -40,11 +40,11 @@ if len(sys.argv) == 2:
 
     shift = border_size
 
-    cursor_rack.execute("SELECT name, size FROM rackview_racks")
+    cursor_rack.execute("SELECT name, size FROM rackview WHERE category = 'Rack'")
     rack_rows = cursor_rack.fetchall()
     for rack_row in rack_rows:
         rack_name = rack_row[0]
-        rack_size = rack_row[1]
+        rack_size = int(rack_row[1])
         rack_height = ((rack_size*unit_size)+(border_size*2))
 
         rack = dwg.g(class_="rack")
@@ -73,33 +73,23 @@ if len(sys.argv) == 2:
                               class_ = "slot_number"))
 
         cursor_machine = con.cursor()
-        cursor_machine.execute("SELECT id, name, base, hbase, size, hspace, model_name, type_num, model_num, serial FROM rackview_machines WHERE rack_name = ?", [(rack_row[0])])
+        cursor_machine.execute("SELECT id, name, size, horizontal_space, base, hbase FROM rackview WHERE rack = ? AND category = 'Machine'", [(rack_row[0])])
         machine_rows = cursor_machine.fetchall()
         for machine_row in machine_rows:
             machine_id = machine_row[0]
             machine_name = machine_row[1]
-            machine_base = height-border_size-unit_size-rack_base_height-((float(machine_row[2])-1)*u_height)
+            machine_size = float(machine_row[2])*u_height
             if machine_row[3]:
-                machine_hbase = float(machine_row[3])
-            else:
-                machine_hbase = 0
-            machine_size = float(machine_row[4])*u_height
-            if machine_row[5]:
-                machine_hspace = float(machine_row[5])
+                machine_hspace = float(machine_row[3])
             else:
                 machine_hspace = 1
-            machine_model_name = str(machine_row[6])
-            machine_type = str(machine_row[7])
-            machine_model = str(machine_row[8])
-            machine_serial = str(machine_row[9])
-
-            #print "%15s | %15s: %4.1f (%5.1f) %4.1f (%5.1f)" % (rack_name, machine_name, machine_row[1], machine_base, machine_row[2], machine_size)
-
-            if machine_serial == "None":
-                url_view = "/machine/id/"+str(machine_id)
+            machine_base = height-border_size-unit_size-rack_base_height-(((machine_row[4])-1)*u_height)
+            if machine_row[5]:
+                machine_hbase = float(machine_row[5])
             else:
-                url_view = "/machine/serial/"+machine_serial
+                machine_hbase = 0
 
+            url_view = "/machine/id/"+str(machine_id)
             machine = dwg.a(url_view, target = "_parent", class_ = "machine")
 
             base_horizontal = shift+(unit_size*2)+(u_width*machine_hbase)
