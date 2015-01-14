@@ -306,6 +306,32 @@ def database_example(session):
                      men, boromir, aragorn, faramir, turgon, turin, beren, denethor,
                      dwarves, hurin, egalmoth, bofur, thorin, oin, dori, balin, gloin])
     session.flush()
+
+    session.add(MachineRack(1, None, legolas.id, elves.id))
+    session.add(MachineRack(2, None, finwe.id, elves.id))
+    session.add(MachineRack(3, None, celeborn.id, elves.id))
+    session.add(MachineRack(4, None, tuor.id, elves.id))
+    session.add(MachineRack(5, None, elros.id, elves.id))
+    session.add(MachineRack(6, None, turgon.id, elves.id))
+    session.add(MachineRack(7, None, galadriel.id, elves.id))
+
+    session.add(MachineRack(1, None, boromir.id, men.id))
+    session.add(MachineRack(1, None, aragorn.id, men.id))
+    session.add(MachineRack(1, None, faramir.id, men.id))
+    session.add(MachineRack(1, None, turgon.id, men.id))
+    session.add(MachineRack(1, None, turin.id, men.id))
+    session.add(MachineRack(1, None, beren.id, men.id))
+    session.add(MachineRack(1, None, denethor.id, men.id))
+
+    session.add(MachineRack(1, None, hurin.id, dwarves.id))
+    session.add(MachineRack(1, None, egalmoth.id, dwarves.id))
+    session.add(MachineRack(1, None, bofur.id, dwarves.id))
+    session.add(MachineRack(1, None, thorin.id, dwarves.id))
+    session.add(MachineRack(1, None, oin.id, dwarves.id))
+    session.add(MachineRack(1, None, dori.id, dwarves.id))
+    session.add(MachineRack(1, None, balin.id, dwarves.id))
+    session.add(MachineRack(1, None, gloin.id, dwarves.id))
+
     session.commit()
 
 def get_session():
@@ -314,18 +340,18 @@ def get_session():
     DBSession = sessionmaker(bind = engine)
     return DBSession()
 
-def rack_list(session):
-    query = session.query(Rack).filter(Rack.state_id == 1).order_by(Rack.sort, collate(Rack.name, 'NOCASE'))
-    #print str(query.statement.compile())
-    return query
+#def rack_list(session):
+    #query = session.query(Rack).filter(Rack.state_id == 1).order_by(Rack.sort, collate(Rack.name, 'NOCASE'))
+    ##print str(query.statement.compile())
+    #return query
 
-def machine_typemodel_list(session):
-    query = session.query(TypeModel).order_by(collate(TypeModel.name, 'NOCASE'))
-    return query
+#def machine_typemodel_list(session):
+    #query = session.query(TypeModel).order_by(collate(TypeModel.name, 'NOCASE'))
+    #return query
 
-def machine_list(session, id = '', sort = ''):
-    query = session.query(Machine).order_by(collate(Machine.name, 'NOCASE'))
-    return query
+#def machine_list(session, id = '', sort = ''):
+    #query = session.query(Machine).order_by(collate(Machine.name, 'NOCASE'))
+    #return query
 
 session = get_session()
 if session.query(State).count() == 0:
