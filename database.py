@@ -81,6 +81,9 @@ class TypeModel(Base):
     category_id = Column(Integer, ForeignKey('category.id'))
     brand_id = Column(Integer, ForeignKey('brand.id'))
 
+    category = relationship('Category')
+    brand = relationship('Brand')
+
     def __init__(self, name, type_num, model_num, size, horizontal_space,
             category_id, brand_id):
         self.name = name
@@ -335,16 +338,21 @@ def get_session():
     DBSession = sessionmaker(bind = engine)
     return DBSession()
 
-#def rack_list(session):
-    #query = session.query(Rack).filter(Rack.state_id == 1).order_by(Rack.sort, collate(Rack.name, 'NOCASE'))
-    ##print str(query.statement.compile())
-    #return query
+def rack_list():
+    category_id = session.query(Category).filter(Category.name == 'Rack').first().id
+    query = session.query(Equipment).join(Equipment.type_model).filter(TypeModel.category_id == category_id)
+    #print str(query.statement.compile())
+    return query
+
+def machine_list(id = '', sort = ''):
+    category_id = session.query(Category).filter(Category.name == 'Machine').first().id
+    query = session.query(Equipment).join(Equipment.type_model).filter(TypeModel.category_id == category_id)
+    return query
 
 #def machine_typemodel_list(session):
     #query = session.query(TypeModel).order_by(collate(TypeModel.name, 'NOCASE'))
     #return query
 
-#def machine_list(session, id = '', sort = ''):
     #query = session.query(Machine).order_by(collate(Machine.name, 'NOCASE'))
     #return query
 

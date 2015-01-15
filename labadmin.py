@@ -13,8 +13,8 @@ session = get_session()
 info = {
     "name"     : "labadmin",
     "version"  : commands.getstatusoutput('git describe --abbrev=0 --tags')[1],
-    "racks"    : session.query(Rack.id).count(),
-    "machines" : session.query(Machine.id).count()
+    "racks"    : rack_list().count(),
+    "machines" : machine_list().count()
 }
 
 @route('/static/:path#.+#', name='static')
@@ -28,7 +28,7 @@ def url_redirect():
 @route('/rack')
 def rack(view = ''):
     subprocess.call(["python", "rackview/rackview.py", "labadmin.db"])
-    return template('rack', info = info, view = view, rack_list = rack_list(session))
+    return template('rack', info = info, view = view, rack_list = rack_list())
 
 @route('/rack/edit')
 def rack_edit():
