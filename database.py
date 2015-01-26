@@ -13,6 +13,8 @@ IN_USE = "In use";
 NOT_IN_USE = "Not in use";
 DISPOSED = "Disposed";
 INVALID = "Invalid";
+RACK = "Rack";
+MACHINE = "Machine";
 
 class Equipment(Base):
     __tablename__ = 'equipment'
@@ -208,8 +210,8 @@ class EventType(Base):
 
 def database_init(session):
     state_in_use = State(IN_USE)
-    category_rack = Category('Rack')
-    category_machine = Category('Machine')
+    category_rack = Category(RACK)
+    category_machine = Category(MACHINE)
 
     session.add_all([state_in_use, State(NOT_IN_USE), State(DISPOSED), State(INVALID),
                      category_rack, category_machine])
@@ -269,7 +271,7 @@ def database_init(session):
 
 def database_example(session):
     state_in_use = session.query(State).filter(State.name == IN_USE).first().id
-    rack = session.query(Category).filter(Category.name == 'Rack').first().id
+    rack = session.query(Category).filter(Category.name == RACK).first().id
     rack_11u = session.query(TypeModel).filter(TypeModel.category_id == rack, TypeModel.size == 11).first().id
     rack_25u = session.query(TypeModel).filter(TypeModel.category_id == rack, TypeModel.size == 25).first().id
     machine = session.query(Category).filter(Category.name == 'Machine').first().id
@@ -339,7 +341,7 @@ def get_session():
     return DBSession()
 
 def rack_list():
-    category_id = session.query(Category).filter(Category.name == 'Rack').first().id
+    category_id = session.query(Category).filter(Category.name == RACK).first().id
     query = session.query(Equipment).join(Equipment.type_model).filter(TypeModel.category_id == category_id)
     #print str(query.statement.compile())
     return query
