@@ -341,9 +341,9 @@ def get_session():
     return DBSession()
 
 def rack_list():
-    category_id = session.query(Category).filter(Category.name == RACK).first().id
-    query = session.query(Equipment).join(Equipment.type_model).filter(TypeModel.category_id == category_id)
-    #print str(query.statement.compile())
+    rack_rowid = session.query(Category).filter(Category.name == RACK).first().id
+    query = session.query(Equipment.id, Equipment.name, TypeModel.size, RackOrder.sort).join(Equipment.type_model).outerjoin(RackOrder).filter(TypeModel.category_id == rack_rowid)
+    #print(query.statement.compile())
     return query
 
 def machine_list(id = '', sort = ''):
