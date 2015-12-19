@@ -11,66 +11,19 @@ Base = declarative_base()
 
 IN_USE = "In use";
 NOT_IN_USE = "Not in use";
-DISPOSED = "Disposed";
 INVALID = "Invalid";
-RACK = "Rack";
-MACHINE = "Machine";
 
 class Equipment(Base):
     __tablename__ = 'equipment'
     id = Column(Integer, primary_key = True)
     name = Column(String(250), nullable = False)
-    type_model_id = Column(Integer, ForeignKey('type_model.id'))
     state_id = Column(Integer, ForeignKey('state.id'))
 
-    type_model = relationship('TypeModel')
     state = relationship('State')
 
-    def __init__(self, name, type_model_id, state_id):
-        self.name = name
-        self.type_model_id = type_model_id
-        self.state_id = state_id
-
-    def __repr__(self):
-        return "<Equipment('%s')>" % self.name
-
-    def get_base(self):
-        return str('{:g}'.format(float(self.base)))
-
-    def get_size(self):
-        return '{:g}'.format(float(self.model.size))
-
-    def get_location(self):
-        if self.base == None or self.rack.state_id != 1:
-            return '-'
-        elif self.model.size == 1:
-            return self.get_base()
-        else:
-            return self.get_base()+' - '+str('{:g}'.format(float(self.base+self.model.size-1)))
-
-class EquipmentFieldType(Base):
-    __tablename__ = 'equipment_field_type'
-    id = Column(Integer, primary_key = True)
-    name = Column(String(250), nullable = False)
-
-    def __init__(self, name):
-        self.name = name
-
-    def __repr__(self):
-        return "<EquipmentFieldType('%s')>" % self.name
-
-class EquipmentField(Base):
-    __tablename__ = 'equipment_field'
-    id = Column(Integer, primary_key = True)
-    description = Column(String(250), nullable = False)
-    equipment_id = Column(Integer, ForeignKey('equipment.id'))
-
-    def __init__(self, description, equipment_id):
-        self.description = description
-        self.equipment_id = equipment_id
-
-    def __repr__(self):
-        return "<EquipmentFieldType('%s')>" % self.description
+    __mapper_args__ = {
+        'polymorphic_identity': 'equipment'
+    }
 
 class TypeModel(Base):
     __tablename__ = 'type_model'
@@ -78,23 +31,9 @@ class TypeModel(Base):
     name = Column(String(250), nullable = False)
     type_num = Column(String(100), nullable = True)
     model_num = Column(String(100), nullable = True)
-    size = Column(Float, nullable = True)
-    horizontal_space = Column(Float, nullable = True)
-    category_id = Column(Integer, ForeignKey('category.id'))
     brand_id = Column(Integer, ForeignKey('brand.id'))
 
-    category = relationship('Category')
     brand = relationship('Brand')
-
-    def __init__(self, name, type_num, model_num, size, horizontal_space,
-            category_id, brand_id):
-        self.name = name
-        self.type_num = type_num
-        self.model_num = model_num
-        self.size = size
-        self.horizontal_space = horizontal_space
-        self.category_id = category_id
-        self.brand_id = brand_id
 
     def __repr__(self):
         return "<TypeModel('%s')>" % self.name
@@ -119,46 +58,133 @@ class TypeModel(Base):
         else:
             return self.type_num+'-'+self.model_num
 
-class Category(Base):
-    __tablename__ = 'category'
+class Rack(Equipment):
+    __tablename__ = 'rack'
+    id = Column(Integer, ForeignKey('equipment.id'), primary_key = True)
+    sort = Column(Integer, nullable = True)
+    type_model_id = Column(Integer, ForeignKey('rack_type_model.id'))
+
+    type_model = relationship('RackTypeModel')
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'rack',
+        'inherit_condition': (id == Equipment.id)
+    }
+
+    def __init__(self, name, type_model_id, state_id, sort = None):
+        self.name = name 
+        self.type_model_id = type_model_id
+        self.state_id = state_id
+        self.sort = sort
+
+    def __repr__(self):
+        return "<Rack('%s')>" % self.name
+
+class RackTypeModel(TypeModel):
+    __tablename__ = 'rack_type_model'
+    id = Column(Integer, ForeignKey('type_model.id'), primary_key = True)
+    size = Column(Integer, nullable = False)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'rack_type_model',
+        'inherit_condition': (id == TypeModel.id)
+    }
+
+    def __init__(self, name, type_num, model_num, brand_id, size):
+        self.name = name 
+        self.type_num = type_num
+        self.model_num = model_num
+        self.size = size 
+
+    def __repr__(self):
+        return "<RackTypeModel('%s')>" % self.name
+
+class Machine(Equipment):
+    __tablename__ = 'machine'
+    id = Column(Integer, ForeignKey('equipment.id'), primary_key = True)
+    base = Column(Float, nullable = True)
+    hbase = Column(Float, nullable = True)
+    rack_id = Column(Integer, ForeignKey('equipment.id'))
+    type_model_id = Column(Integer, ForeignKey('machine_type_model.id'))
+
+    type_model = relationship('MachineTypeModel')
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'machine',
+        'inherit_condition': (id == Equipment.id)
+    }
+
+    def __init__(self, name, type_model_id, state_id, base = None, hbase = None, rack_id = None):
+        self.name = name 
+        self.type_model_id = type_model_id
+        self.state_id = state_id
+        self.base = base
+        self.hbase = hbase
+        self.rack_id = rack_id
+
+    def __repr__(self):
+        return "<Machine('%s')>" % self.name
+
+    def get_base(self):
+        return str('{:g}'.format(float(self.base)))
+
+    def get_size(self):
+        return '{:g}'.format(float(self.model.size))
+
+    def get_location(self):
+        if self.base == None or self.rack.state_id != 1:
+            return '-'
+        elif self.model.size == 1:
+            return self.get_base()
+        else:
+            return self.get_base()+' - '+str('{:g}'.format(float(self.base+self.model.size-1)))
+
+class MachineTypeModel(TypeModel):
+    __tablename__ = 'machine_type_model'
+    id = Column(Integer, ForeignKey('type_model.id'), primary_key = True)
+    size = Column(Float, nullable = True)
+    horizontal_space = Column(Float, nullable = True)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'machine_type_model',
+        'inherit_condition': (id == TypeModel.id)
+    }
+
+    def __init__(self, name, type_num, model_num, brand_id, size, horizontal_space = None):
+        self.name = name 
+        self.type_num = type_num
+        self.model_num = model_num
+        self.size = size 
+        self.horizontal_space = horizontal_space
+
+    def __repr__(self):
+        return "<MachineTypeModel('%s')>" % self.name
+
+class Field(Base):
+    __tablename__ = 'field'
     id = Column(Integer, primary_key = True)
-    name = Column(String(100), nullable = False)
+    name = Column(String(250), nullable = False)
+    field_id = Column(Integer, ForeignKey('field_type.id'))
+    equipment_id = Column(Integer, ForeignKey('equipment.id'))
+
+    def __init__(self, name, field_id, equipment_id):
+        self.name = name
+        self.field_id = field_id
+        self.equipment_id = equipment_id
+
+    def __repr__(self):
+        return "<Field('%s')>" % self.name
+
+class FieldType(Base):
+    __tablename__ = 'field_type'
+    id = Column(Integer, primary_key = True)
+    name = Column(String(250), nullable = False)
 
     def __init__(self, name):
         self.name = name
 
     def __repr__(self):
-        return "<Category('%s')>" % self.name
-
-class MachineRack(Base):
-    __tablename__ = 'machine_rack'
-    id = Column(Integer, primary_key = True)
-    base = Column(Float, nullable = True)
-    hbase = Column(Float, nullable = True)
-    machine_id = Column(Integer, ForeignKey('equipment.id'))
-    rack_id = Column(Integer, ForeignKey('equipment.id'))
-
-    def __init__(self, base, hbase, machine_id, rack_id):
-        self.base = base
-        self.hbase = hbase
-        self.machine_id = machine_id
-        self.rack_id = rack_id
-
-    def __repr__(self):
-        return "<MachineRack('%u, %u')>" % (self.machine_id, self.rack_id)
-
-class RackOrder(Base):
-    __tablename__ = 'rack_order'
-    id = Column(Integer, primary_key = True)
-    sort = Column(Integer, nullable = False)
-    rack_id = Column(Integer, ForeignKey('equipment.id'))
-
-    def __init__(self, sort, rack_id):
-        self.sort = sort
-        self.rack_id = rack_id
-
-    def __repr__(self):
-        return "<RackOrder('%s')>" % self.sort
+        return "<FieldType('%s')>" % self.name
 
 class Brand(Base):
     __tablename__ = 'brand'
@@ -209,127 +235,96 @@ class EventType(Base):
         return "<EventType('%s')>" % self.name
 
 def database_init(session):
-    state_in_use = State(IN_USE)
-    category_rack = Category(RACK)
-    category_machine = Category(MACHINE)
-
-    session.add_all([state_in_use, State(NOT_IN_USE), State(DISPOSED), State(INVALID),
-                     category_rack, category_machine])
+    session.add(State(IN_USE))
+    session.add(State(NOT_IN_USE))
+    session.add(State(INVALID))
+    session.add(RackTypeModel('Generic rack', '11U', None, None, 11))
+    session.add(RackTypeModel('Generic rack', '25U', None, None, 25))
+    session.add(RackTypeModel('Generic rack', '42U', None, None, 42))
+    session.add(MachineTypeModel('Generic machine', '1U', None, None, 1))
+    session.add(MachineTypeModel('Generic machine', '2U', None, None, 2))
+    session.add(MachineTypeModel('Generic machine', '3U', None, None, 3))
+    session.add(MachineTypeModel('Generic machine', '4U', None, None, 4))
+    session.add(MachineTypeModel('Generic machine', '5U', None, None, 5))
     session.flush()
 
-    session.add(TypeModel('Generic rack', '11U', None, 11, None, category_rack.id, None))
-    session.add(TypeModel('Generic rack', '25U', None, 25, None, category_rack.id, None))
-    session.add(TypeModel('Generic rack', '42U', None, 42, None, category_rack.id, None))
-    session.add(TypeModel('Generic machine', '1U', None, 1, None, category_machine.id, None))
-    session.add(TypeModel('Generic machine', '2U', None, 2, None, category_machine.id, None))
-    session.add(TypeModel('Generic machine', '3U', None, 3, None, category_machine.id, None))
-    session.add(TypeModel('Generic machine', '4U', None, 4, None, category_machine.id, None))
-    session.add(TypeModel('Generic machine', '5U', None, 5, None, category_machine.id, None))
-    session.flush()
+    #Machine = aliased(Equipment, name='machine')
+    #Rack = aliased(Equipment, name='rack')
 
-    Machine = aliased(Equipment, name='machine')
-    Rack = aliased(Equipment, name='rack')
+    #query_rack = session.query(Rack.id.label('id'),
+                               #Rack.name.label('name'),
+                               #TypeModel.size.label('size'),
+                               #TypeModel.horizontal_space.label('horizontal_space'),
+                               #Category.name.label('category'),
+                               #sql.null().label('rack'),
+                               #sql.null().label('base'),
+                               #sql.null().label('hbase')
+                               #).filter(Rack.type_model_id == TypeModel.id,
+                                        #TypeModel.category_id == Category.id,
+                                        #Rack.state_id == state_in_use.id,
+                                        #Category.id == category_rack.id)
 
-    query_rack = session.query(Rack.id.label('id'),
-                               Rack.name.label('name'),
-                               TypeModel.size.label('size'),
-                               TypeModel.horizontal_space.label('horizontal_space'),
-                               Category.name.label('category'),
-                               sql.null().label('rack'),
-                               sql.null().label('base'),
-                               sql.null().label('hbase')
-                               ).filter(Rack.type_model_id == TypeModel.id,
-                                        TypeModel.category_id == Category.id,
-                                        Rack.state_id == state_in_use.id,
-                                        Category.id == category_rack.id)
-
-    query_machine = session.query(Machine.id.label('id'),
-                                  Machine.name.label('name'),
-                                  TypeModel.size.label('size'),
-                                  TypeModel.horizontal_space.label('horizontal_space'),
-                                  Category.name.label('category'),
-                                  Rack.name.label('rack'),
-                                  MachineRack.base,
-                                  MachineRack.hbase
-                                  ).filter(Machine.type_model_id == TypeModel.id,
-                                           TypeModel.category_id == Category.id,
-                                           Machine.state_id == state_in_use.id,
-                                           Rack.state_id == state_in_use.id,
-                                           MachineRack.machine_id == Machine.id,
-                                           MachineRack.rack_id == Rack.id
-                                           )
+    #query_machine = session.query(Machine.id.label('id'),
+                                  #Machine.name.label('name'),
+                                  #TypeModel.size.label('size'),
+                                  #TypeModel.horizontal_space.label('horizontal_space'),
+                                  #Category.name.label('category'),
+                                  #Rack.name.label('rack'),
+                                  #MachineRack.base,
+                                  #MachineRack.hbase
+                                  #).filter(Machine.type_model_id == TypeModel.id,
+                                           #TypeModel.category_id == Category.id,
+                                           #Machine.state_id == state_in_use.id,
+                                           #Rack.state_id == state_in_use.id,
+                                           #MachineRack.machine_id == Machine.id,
+                                           #MachineRack.rack_id == Rack.id
+                                           #)
                                   #.order_by(MachineRack.base.desc(),
                                                       #collate(Machine.name, 'NOCASE'))
 
-    query = query_rack.union(query_machine)
+    #query = query_rack.union(query_machine)
     #query = aliased(query_union, name='all')
-    select_string = str(query.statement.compile().statement.compile(compile_kwargs = {"literal_binds": True}))
-    print select_string
-    session.execute("CREATE VIEW rackview AS "+select_string+";")
+    #select_string = str(query.statement.compile().statement.compile(compile_kwargs = {"literal_binds": True}))
+    #print select_string
+    #session.execute("CREATE VIEW rackview AS "+select_string+";")
 
     session.commit()
 
 def database_example(session):
     state_in_use = session.query(State).filter(State.name == IN_USE).first().id
-    rack = session.query(Category).filter(Category.name == RACK).first().id
-    rack_11u = session.query(TypeModel).filter(TypeModel.category_id == rack, TypeModel.size == 11).first().id
-    rack_25u = session.query(TypeModel).filter(TypeModel.category_id == rack, TypeModel.size == 25).first().id
-    machine = session.query(Category).filter(Category.name == 'Machine').first().id
-    machine_1u = session.query(TypeModel).filter(TypeModel.category_id == machine, TypeModel.size == 1).first().id
-    machine_2u = session.query(TypeModel).filter(TypeModel.category_id == machine, TypeModel.size == 2).first().id
-    machine_5u = session.query(TypeModel).filter(TypeModel.category_id == machine, TypeModel.size == 5).first().id
+    rack_11u = session.query(RackTypeModel).filter(RackTypeModel.size == 11).first().id
+    rack_25u = session.query(RackTypeModel).filter(RackTypeModel.size == 25).first().id
+    machine_1u = session.query(MachineTypeModel).filter(MachineTypeModel.size == 1).first().id
+    machine_2u = session.query(MachineTypeModel).filter(MachineTypeModel.size == 2).first().id
+    machine_5u = session.query(MachineTypeModel).filter(MachineTypeModel.size == 5).first().id
 
-    elves = Equipment('elves', rack_25u, state_in_use)
-    legolas = Equipment('legolas', machine_1u, state_in_use)
-    finwe = Equipment('finwe', machine_2u, state_in_use)
-    tuor = Equipment('tuor', machine_2u, state_in_use)
-    elros = Equipment('elros', machine_1u, state_in_use)
-    turgon = Equipment('turgon', machine_5u, state_in_use)
-    galadriel = Equipment('galadriel', machine_5u, state_in_use)
-
-    men = Equipment('men', rack_25u, state_in_use)
-    boromir = Equipment('boromir', machine_1u, state_in_use)
-    aragorn = Equipment('aragorn', machine_2u, state_in_use)
-    faramir = Equipment('faramir', machine_2u, state_in_use)
-    turin = Equipment('turin', machine_5u, state_in_use)
-    beren = Equipment('beren', machine_1u, state_in_use)
-    denethor = Equipment('denethor', machine_1u, state_in_use)
-
-    dwarves = Equipment('dwarves', rack_11u, state_in_use)
-    hurin = Equipment('hurin', machine_2u, state_in_use)
-    bofur = Equipment('bofur', machine_1u, state_in_use)
-    thorin = Equipment('thorin', machine_2u, state_in_use)
-    oin = Equipment('oin', machine_1u, state_in_use)
-    dori = Equipment('dori', machine_1u, state_in_use)
-    balin = Equipment('balin', machine_1u, state_in_use)
-    gloin = Equipment('gloin', machine_1u, state_in_use)
-
-    session.add_all([elves, legolas, finwe, tuor, elros, turgon, galadriel,
-                     men, boromir, aragorn, faramir, turin, beren, denethor,
-                     dwarves, hurin, bofur, thorin, oin, dori, balin, gloin])
+    elves = Rack('elves', rack_25u, state_in_use)
+    men = Rack('men', rack_25u, state_in_use)
+    dwarves = Rack('dwarves', rack_11u, state_in_use)
+    session.add_all([elves, men, dwarves])
     session.flush()
 
-    session.add(MachineRack(25, None, legolas.id, elves.id))
-    session.add(MachineRack(20, None, finwe.id, elves.id))
-    session.add(MachineRack(17, None, tuor.id, elves.id))
-    session.add(MachineRack(16, None, elros.id, elves.id))
-    session.add(MachineRack(6, None, turgon.id, elves.id))
-    session.add(MachineRack(1, None, galadriel.id, elves.id))
+    session.add(Machine('legolas', machine_1u, state_in_use, 25, None, elves.id))
+    session.add(Machine('finwe', machine_2u, state_in_use, 20, None, elves.id))
+    session.add(Machine('tuor', machine_2u, state_in_use, 17, None, elves.id))
+    session.add(Machine('elros', machine_1u, state_in_use, 16, None, elves.id))
+    session.add(Machine('turgon', machine_5u, state_in_use, 6, None, elves.id))
+    session.add(Machine('galadriel', machine_5u, state_in_use, 1, None, elves.id))
 
-    session.add(MachineRack(20, None, boromir.id, men.id))
-    session.add(MachineRack(15, None, aragorn.id, men.id))
-    session.add(MachineRack(13, None, faramir.id, men.id))
-    session.add(MachineRack(6, None, turin.id, men.id))
-    session.add(MachineRack(3, None, beren.id, men.id))
-    session.add(MachineRack(2, None, denethor.id, men.id))
+    session.add(Machine('boromir', machine_1u, state_in_use, 20, None, men.id))
+    session.add(Machine('aragorn', machine_2u, state_in_use, 15, None, men.id))
+    session.add(Machine('faramir', machine_2u, state_in_use, 13, None, men.id))
+    session.add(Machine('turin', machine_5u, state_in_use, 6, None, men.id))
+    session.add(Machine('beren', machine_1u, state_in_use, 3, None, men.id))
+    session.add(Machine('denethor', machine_1u, state_in_use, 2, None, men.id))
 
-    session.add(MachineRack(10, None, hurin.id, dwarves.id))
-    session.add(MachineRack(8, None, bofur.id, dwarves.id))
-    session.add(MachineRack(6, None, thorin.id, dwarves.id))
-    session.add(MachineRack(4, None, oin.id, dwarves.id))
-    session.add(MachineRack(3, None, dori.id, dwarves.id))
-    session.add(MachineRack(2, None, balin.id, dwarves.id))
-    session.add(MachineRack(1, None, gloin.id, dwarves.id))
+    session.add(Machine('hurin', machine_2u, state_in_use, 10, None, dwarves.id))
+    session.add(Machine('bofur', machine_1u, state_in_use, 8, None, dwarves.id))
+    session.add(Machine('thorin', machine_2u, state_in_use, 6, None, dwarves.id))
+    session.add(Machine('oin', machine_1u, state_in_use, 4, None, dwarves.id))
+    session.add(Machine('dori', machine_1u, state_in_use, 3, None, dwarves.id))
+    session.add(Machine('balin', machine_1u, state_in_use, 2, None, dwarves.id))
+    session.add(Machine('gloin', machine_1u, state_in_use, 1, None, dwarves.id))
 
     session.flush()
     session.commit()
@@ -341,22 +336,13 @@ def get_session():
     return DBSession()
 
 def rack_list():
-    rack_rowid = session.query(Category).filter(Category.name == RACK).first().id
-    query = session.query(Equipment.id, Equipment.name, TypeModel.size, RackOrder.sort).join(Equipment.type_model).outerjoin(RackOrder).filter(TypeModel.category_id == rack_rowid)
-    #print(query.statement.compile())
-    return query
+    return session.query(Rack).order_by(Rack.sort, collate(Rack.name, 'NOCASE'))
+
+def rack_type_model_list():
+    return session.query(RackTypeModel).order_by(collate(RackTypeModel.name, 'NOCASE'), RackTypeModel.type_num, RackTypeModel.model_num)
 
 def machine_list(id = '', sort = ''):
-    category_id = session.query(Category).filter(Category.name == 'Machine').first().id
-    query = session.query(Equipment).join(Equipment.type_model).filter(TypeModel.category_id == category_id)
-    return query
-
-#def machine_typemodel_list(session):
-    #query = session.query(TypeModel).order_by(collate(TypeModel.name, 'NOCASE'))
-    #return query
-
-    #query = session.query(Machine).order_by(collate(Machine.name, 'NOCASE'))
-    #return query
+    return session.query(Machine).order_by(collate(Machine.name, 'NOCASE'))
 
 session = get_session()
 if session.query(State).count() == 0:
@@ -366,9 +352,12 @@ if session.query(State).count() == 0:
 print ""
 print "labadmin"
 print "--------"
-print "  equipments ... %2u" % session.query(Equipment.id).count()
-print "  type models .. %2u" % session.query(TypeModel.id).count()
-print "  categories ... %2u" % session.query(Category.id).count()
-print "  brands ....... %2u" % session.query(Brand.id).count()
-print "  states ....... %2u" % session.query(State.id).count()
+print "  equipments (total: %u):" % session.query(Equipment.id).count()
+print "     racks....... %2u" % session.query(Rack.id).count()
+print "     machines.... %2u" % session.query(Machine.id).count()
+print "  type models (total: %u):" % session.query(TypeModel.id).count()
+print "     racks ...... %2u" % session.query(RackTypeModel.id).count()
+print "     machines ... %2u" % session.query(MachineTypeModel.id).count()
+print "  brands ........ %2u" % session.query(Brand.id).count()
+print "  states ........ %2u" % session.query(State.id).count()
 print ""

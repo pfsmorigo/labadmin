@@ -28,7 +28,8 @@ def url_redirect():
 @route('/rack')
 def rack(view = ''):
     subprocess.call(["python", "rackview/rackview.py", "labadmin.db"])
-    return template('rack', info = info, view = view, rack_list = rack_list())
+    return template('rack', info = info, view = view, rack_list = rack_list(),
+                    rack_type_model_list = rack_type_model_list())
 
 @route('/rack/edit')
 def rack_edit():
