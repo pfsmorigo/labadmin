@@ -1,4 +1,4 @@
-% rebase('base.tpl', title='about')
+% rebase('base.tpl')
 		<div id="menu">
 			<a href="/about"{{!' class="current"' if info['view'] == 'about' else ''}}>about</a>
 		</div>

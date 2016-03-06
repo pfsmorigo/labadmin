@@ -12,10 +12,10 @@
 	<body>
 		<div id="header">
 			<div style="float: right">
-				<a href="/configuration"{{!' class="current"' if title == 'configuration' else ''}}>configuration</a>
-				<a href="/about"{{!' class="current"' if title == 'about' else ''}}>{{info['name']}} {{info['version']}}</a>
+				<a href="/configuration"{{!' class="current"' if info['area'] == 'configuration' else ''}}>configuration</a>
+				<a href="/about"{{!' class="current"' if info['area'] == 'about' else ''}}>{{info['name']}} {{info['version']}}</a>
 			</div>
-%for area in info['area_list']:
+%for area in info['areas']:
 			<a href="/{{area}}"{{!' class="current"' if info['area'] == area else ''}}>{{area}}s</a>
 %end
 		</div>

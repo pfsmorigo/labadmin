@@ -11,9 +11,9 @@ from types import IntType, FloatType
 session = get_session()
 
 info = {
-    "name"      : "labadmin",
-    "version"   : commands.getstatusoutput('git describe --abbrev=0 --tags')[1],
-    "area_list" : [ "location", "rack", "machine", "brand", "model" ]
+    "name"    : "labadmin",
+    "version" : commands.getstatusoutput('git describe --abbrev=0 --tags')[1],
+    "areas"   : [ "location", "rack", "machine" ]
 }
 
 @route('/static/:path#.+#', name='static')
