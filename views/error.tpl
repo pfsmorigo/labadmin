@@ -1,11 +1,10 @@
 <%
-title = 'error %s' % error.status_code
+title = 'error %s' % info['error'].status_code
 %>
-% rebase('base.tpl', title = title)
+% rebase('base.tpl', info = info)
 		<div id="menu">
-			<a href="/">{{error.status}}</a>
+			<a href="/">{{info['error'].status}}</a>
 		</div>
 
 		<img src="/static/error.svg" />
-		<h1>{{error.status}}</h1>
-
+		<h1>{{info['error'].status}}</h1>

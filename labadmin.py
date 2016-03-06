@@ -31,73 +31,51 @@ def page(area, view = '', item = ''):
     info['area'] = area
     info['view'] = view
     info['item'] = item
+    info['sort'] = 'name' # default sort is by name
 
     if area == "rack":
         subprocess.call(["python", "rackview/rackview.py", "labadmin.db"])
         info['rack_list'] = rack_list()
         info['rack_type_model_list'] = rack_type_model_list()
 
+    if area == "machine":
+        if view.startswith('by_'):
+            info['sort'] = view[3:]
+
+        info['rack_list'] = rack_list()
+        info['machine_list'] = machine_list(item, info['sort'])
+        info['machine_type_model_list'] = machine_type_model_list()
+
     return template(area, info = info)
 
 @route('/<area>', method='POST')
 def page_post(area):
-    return page(area)
+    if area == "rack":
+        new = {}
+        for attribute, value in request.forms.allitems():
+            if value == "None":
+                continue
 
-@route('/rack', method='POST')
-def rack_post():
-    new = {}
-    for attribute, value in request.forms.allitems():
-        if value == "None":
-            continue
+            item_id = attribute.split('_', 1)[0]
+            column_name = attribute.split('_', 1)[1]
 
-        item_id = attribute.split('_', 1)[0]
-        column_name = attribute.split('_', 1)[1]
+            if item_id != "new":
+                print "db update, rack id %s: %s = %s" % (item_id, column_name, value)
 
-        if item_id != "new":
-            print "db update, rack id %s: %s = %s" % (item_id, column_name, value)
-
-            session.query(Rack).filter_by(id = item_id).update({column_name: value})
-
-            session.commit()
-        else:
-            if value:
-                new[column_name] = value
+                session.query(Rack).filter_by(id = item_id).update({column_name: value})
+                session.commit()
             else:
-                new[column_name] = None
+                if value:
+                    new[column_name] = value
+                else:
+                    new[column_name] = None
 
-    if new['name'] and new['size']:
-        print "db insert: machine: %s" % new
-        session.add(Rack(new['name'], new['size'], new['sort'], 1))
-        session.commit()
+        if new['name'] and new['size']:
+            print "db insert: machine: %s" % new
+            session.add(Rack(new['name'], new['size'], new['sort'], 1))
+            session.commit()
 
-    return rack()
-
-@route('/machine')
-def machine(view = '', id = '', sort = ''):
-    return template('machine', info = info, view = view, sort = sort,
-            machine_list = machine_list(session, id, sort),
-            rack_list = rack_list(session),
-            machine_typemodel_list = machine_typemodel_list(session))
-
-@route('/machine/edit')
-def machine_edit():
-    return machine(view = 'edit')
-
-@route('/machine/id/<id>')
-def machine_id(id):
-    return machine(id = id)
-
-@route('/machine/id/<id>/edit')
-def machine_id_edit(id):
-    return machine(id = id, view = 'edit')
-
-@route('/machine_by_<sort>')
-def machine_sort(sort):
-    return machine(sort = sort)
-
-@route('/machine_by_<sort>/edit')
-def machine_sort_edit(sort):
-    return machine(sort = sort, view = 'edit')
+    return page(area)
 
 @route('/machine', method='POST')
 def machine_post():
@@ -146,14 +124,11 @@ def configuration(subject = ""):
     output = template('configuration', info = info, subject = "", result = result)
     return output
 
-@route('/about')
-def about(view = 'about'):
-    return template('about', info = info, view = view)
-
 @error(404)
 @error(500)
 def error(error):
-    return template('error', info = info, error = error)
+    info['error'] = error
+    return template('error', info = info)
 
 def convert(value, var_type):
     try:

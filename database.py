@@ -72,7 +72,7 @@ class Rack(Equipment):
     }
 
     def __init__(self, name, type_model_id, state_id, sort = None):
-        self.name = name 
+        self.name = name
         self.type_model_id = type_model_id
         self.state_id = state_id
         self.sort = sort
@@ -91,10 +91,10 @@ class RackTypeModel(TypeModel):
     }
 
     def __init__(self, name, type_num, model_num, brand_id, size):
-        self.name = name 
+        self.name = name
         self.type_num = type_num
         self.model_num = model_num
-        self.size = size 
+        self.size = size
 
     def __repr__(self):
         return "<RackTypeModel('%s')>" % self.name
@@ -115,7 +115,7 @@ class Machine(Equipment):
     }
 
     def __init__(self, name, type_model_id, state_id, base = None, hbase = None, rack_id = None):
-        self.name = name 
+        self.name = name
         self.type_model_id = type_model_id
         self.state_id = state_id
         self.base = base
@@ -151,10 +151,10 @@ class MachineTypeModel(TypeModel):
     }
 
     def __init__(self, name, type_num, model_num, brand_id, size, horizontal_space = None):
-        self.name = name 
+        self.name = name
         self.type_num = type_num
         self.model_num = model_num
-        self.size = size 
+        self.size = size
         self.horizontal_space = horizontal_space
 
     def __repr__(self):
@@ -344,6 +344,9 @@ def rack_type_model_list():
 def machine_list(id = '', sort = ''):
     return session.query(Machine).order_by(collate(Machine.name, 'NOCASE'))
 
+def machine_type_model_list():
+    return session.query(MachineTypeModel).order_by(collate(MachineTypeModel.name, 'NOCASE'))
+
 session = get_session()
 if session.query(State).count() == 0:
     database_init(session)
@@ -365,13 +368,9 @@ print ""
 column_name = 'name'
 value = 'xavier'
 
-
-print session.query(Rack).filter(id == 2)
+#print session.query(Rack).filter(id == 2)
 #session.query(Rack).filter(id == 2).update({column_name: value})
 
 for rack in rack_list():
     print rack.name
-
-
-
 

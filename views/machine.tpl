@@ -1,16 +1,16 @@
-% rebase('base.tpl', title='machines')
+% rebase('base.tpl', info = info)
 		<div id="menu">
-%if view == "edit":
+%if info['view'] == "edit":
 			<div style="float: right">
 				<a href="#" onclick="document.machine.submit();">done</a>
 				<a href="/machine">cancel</a>
 			</div>
 %end
-			<a href="/machine"{{!' class="current"' if view == '' else ''}}>list</a>
-			<a href="/machine/edit"{{!' class="current"' if view == 'edit' else ''}}>edit</a>
+			<a href="/machine"{{!' class="current"' if info['view'] == '' else ''}}>list</a>
+			<a href="/machine/edit"{{!' class="current"' if info['view'] == 'edit' else ''}}>edit</a>
 		</div>
-		<h2>Machines by {{sort}} (Total: {{machine_list.count()}})</h2>
-%if view == "edit":
+		<h2>Machines by {{info['sort']}} (Total: {{info['machine_list'].count()}})</h2>
+%if info['view'] == "edit":
 		<form method="POST" name="machine" action="/machine">
 			<table id="details">
 				<tr>
@@ -25,13 +25,13 @@
 					<th>U Base</th>
 					<th>H Base</th>
 				</tr>
-	%for machine in machine_list:
+	%for machine in info['machine_list']:
 				<tr>
 					<td><input type="checkbox" name="{{machine.id}}_del" value="1"></td>
 					<td><input type="text" class="name" name="{{machine.id}}_name" value="{{machine.name}}" /></td>
 					<td>
 						<select class="model" name="{{machine.id}}_model_id">
-		%for machine_model in machine_model_list:
+		%for machine_model in info['machine_model_list']:
 						    <option value="{{machine_model.id}}"{{!' selected="selected"' if machine_model.id == machine.model_id else ''}}>{{machine_model.get_description()}}</option>
 		%end
 						</select>
@@ -62,7 +62,7 @@
 					<td>
 						<select class="rack" name="{{machine.id}}_rack_id">
 							<option value="0">None</option>
-		%for rack in rack_list:
+		%for rack in info['rack_list']:
 						    <option value="{{rack.id}}"{{!' selected="selected"' if rack.id == machine.rack_id else ''}}>{{rack.name}}</option>
 		%end
 						</select>
@@ -76,7 +76,7 @@
 					<td><input type="text" class="name" name="new_name" /></td>
 					<td>
 						<select class="model" name="new_model_id">
-		%for machine_model in machine_model_list:
+		%for machine_model in info['machine_model_list']:
 						    <option value="{{machine_model.id}}">{{machine_model.get_description()}}</option>
 		%end
 						</select>
@@ -107,7 +107,7 @@
 					<td>
 						<select class="rack" name="new_rack_id">
 							<option value="0">None</option>
-		%for rack in rack_list:
+		%for rack in info['rack_list']:
 							<option value="{{rack.id}}">{{rack.name}}</option>
 		%end
 						</select>
@@ -120,16 +120,16 @@
 %else:
 		<table id="machine_list">
 			<tr>
-				<th><a href="/machine">Machine {{!'&#9650;' if sort == 'name' else ''}}</a></th>
-				<th><a href="/machine_by_model">Model{{!' &#9650;' if sort == 'model' else ''}}</a></th>
-				<th><a href="/machine_by_serial">Serial{{!' &#9650;' if sort == 'serial' else ''}}</a></th>
-				<th><a href="/machine_by_unit_value">Unit Value{{!' &#9650;' if sort == 'unit_value' else ''}}</a></th>
-				<th><a href="/machine_by_invoice">Invoice{{!' &#9650;' if sort == 'invoice' else ''}}</a></th>
-				<th><a href="/machine_by_cap_date">Cap. Date{{!' &#9650;' if sort == 'cap_date' else ''}}</a></th>
-				<th><a href="/machine_by_size">Size{{!' &#9650;' if sort == 'size' else ''}}</a></th>
-				<th colspan="2"><a href="/machine_by_location">Location{{!' &#9650;' if sort == 'location' else ''}}</a></th>
+				<th><a href="/machine">Machine {{!'&#9650;' if info['sort'] == 'name' else ''}}</a></th>
+				<th><a href="/machine/by_model">Model{{!' &#9650;' if info['sort'] == 'model' else ''}}</a></th>
+				<th><a href="/machine/by_serial">Serial{{!' &#9650;' if info['sort'] == 'serial' else ''}}</a></th>
+				<th><a href="/machine/by_unit_value">Unit Value{{!' &#9650;' if ['sort'] == 'unit_value' else ''}}</a></th>
+				<th><a href="/machine/by_invoice">Invoice{{!' &#9650;' if ['sort'] == 'invoice' else ''}}</a></th>
+				<th><a href="/machine/by_cap_date">Cap. Date{{!' &#9650;' if ['sort'] == 'cap_date' else ''}}</a></th>
+				<th><a href="/machine/by_size">Size{{!' &#9650;' if info['sort'] == 'size' else ''}}</a></th>
+				<th colspan="2"><a href="/machine/by_location">Location{{!' &#9650;' if info['sort'] == 'location' else ''}}</a></th>
 			</tr>
-			%for machine in machine_list:
+			%for machine in info['machine_list']:
 			<tr>
 				<td><a href="/machine/id/{{machine.id}}">{{machine.name}}</a></td>
 				<td><a href="/model/{{machine.model.id}}">{{machine.model.name}} {{!'' if machine.model.get_type_model() == '' else '('+machine.model.get_type_model()+')'}}</a></td>
