@@ -143,20 +143,6 @@ def machine_post():
 
     return machine()
 
-@route('/configuration')
-@route('/configuration/<subject>')
-def configuration(subject = ""):
-    if subject == 'brand':
-        result = db.query("SELECT * FROM machine_brand").fetchall()
-    elif subject == 'rack_model':
-        result = db.query("SELECT * FROM model_type").fetchall()
-    elif subject == 'machine_model':
-        result = db.query("SELECT * FROM machine_model").fetchall()
-    else:
-        result = ""
-    output = template('configuration', info = info, subject = "", result = result)
-    return output
-
 @error(404)
 @error(500)
 def error(error):

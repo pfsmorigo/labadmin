@@ -12,7 +12,6 @@
 	<body>
 		<div id="header">
 			<div style="float: right">
-				<a href="/configuration"{{!' class="current"' if info['area'] == 'configuration' else ''}}>configuration</a>
 				<a href="/about"{{!' class="current"' if info['area'] == 'about' else ''}}>{{info['name']}} {{info['version']}}</a>
 			</div>
 %for area in info['areas']:
