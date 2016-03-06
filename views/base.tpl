@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/MarkUp/SCHEMA/xhtml11.xsd" xml:lang="en">
 
 	<head>
-		<title>{{title}} | labadmin</title>
+		<title>{{info['area']}}s | labadmin</title>
 		<link rel="stylesheet" type="text/css" href="/static/default.css" />
 		<link rel="icon" type="image/png" href="/static/favicon.png" />
 	</head>
@@ -15,8 +15,9 @@
 				<a href="/configuration"{{!' class="current"' if title == 'configuration' else ''}}>configuration</a>
 				<a href="/about"{{!' class="current"' if title == 'about' else ''}}>{{info['name']}} {{info['version']}}</a>
 			</div>
-			<a href="/rack"{{!' class="current"' if title == 'racks' else ''}}>racks ({{info['racks']}})</a>
-			<a href="/machine"{{!' class="current"' if title == 'machines' else ''}}>machines ({{info['machines']}})</a>
+%for area in info['area_list']:
+			<a href="/{{area}}"{{!' class="current"' if info['area'] == area else ''}}>{{area}}s</a>
+%end
 		</div>
 {{!base}}
 	</body>

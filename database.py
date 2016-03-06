@@ -361,3 +361,17 @@ print "     machines ... %2u" % session.query(MachineTypeModel.id).count()
 print "  brands ........ %2u" % session.query(Brand.id).count()
 print "  states ........ %2u" % session.query(State.id).count()
 print ""
+
+column_name = 'name'
+value = 'xavier'
+
+
+print session.query(Rack).filter(id == 2)
+#session.query(Rack).filter(id == 2).update({column_name: value})
+
+for rack in rack_list():
+    print rack.name
+
+
+
+

@@ -11,10 +11,9 @@ from types import IntType, FloatType
 session = get_session()
 
 info = {
-    "name"     : "labadmin",
-    "version"  : commands.getstatusoutput('git describe --abbrev=0 --tags')[1],
-    "racks"    : rack_list().count(),
-    "machines" : machine_list().count()
+    "name"      : "labadmin",
+    "version"   : commands.getstatusoutput('git describe --abbrev=0 --tags')[1],
+    "area_list" : [ "location", "rack", "machine", "brand", "model" ]
 }
 
 @route('/static/:path#.+#', name='static')
@@ -25,15 +24,24 @@ def static(path):
 def url_redirect():
     redirect("/rack")
 
-@route('/rack')
-def rack(view = ''):
-    subprocess.call(["python", "rackview/rackview.py", "labadmin.db"])
-    return template('rack', info = info, view = view, rack_list = rack_list(),
-                    rack_type_model_list = rack_type_model_list())
+@route('/<area>')
+@route('/<area>/<view>')
+@route('/<area>/<view>/<item>')
+def page(area, view = '', item = ''):
+    info['area'] = area
+    info['view'] = view
+    info['item'] = item
 
-@route('/rack/edit')
-def rack_edit():
-    return rack('edit')
+    if area == "rack":
+        subprocess.call(["python", "rackview/rackview.py", "labadmin.db"])
+        info['rack_list'] = rack_list()
+        info['rack_type_model_list'] = rack_type_model_list()
+
+    return template(area, info = info)
+
+@route('/<area>', method='POST')
+def page_post(area):
+    return page(area)
 
 @route('/rack', method='POST')
 def rack_post():
@@ -46,8 +54,10 @@ def rack_post():
         column_name = attribute.split('_', 1)[1]
 
         if item_id != "new":
-            print "db update: rack, %s, %s, %s." % (item_id, column_name, value)
+            print "db update, rack id %s: %s = %s" % (item_id, column_name, value)
+
             session.query(Rack).filter_by(id = item_id).update({column_name: value})
+
             session.commit()
         else:
             if value:
@@ -101,7 +111,7 @@ def machine_post():
         column_name = attribute.split('_', 1)[1]
 
         if item_id != "new":
-            print "db update: machine, %s, %s, %s." % (item_id, column_name, value)
+            print "db update, machine id %s: %s = %s" % (item_id, column_name, value)
             session.query(Machine).filter_by(id = item_id).update({column_name: value})
             session.commit()
         else:
