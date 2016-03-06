@@ -1,4 +1,4 @@
-% rebase('base.tpl', info = info)
+% rebase('base.tpl')
 		<div id="menu">
 %if info['view'] == "edit":
 			<div style="float: right">

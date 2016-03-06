@@ -341,6 +341,9 @@ def rack_list():
 def rack_type_model_list():
     return session.query(RackTypeModel).order_by(collate(RackTypeModel.name, 'NOCASE'), RackTypeModel.type_num, RackTypeModel.model_num)
 
+def brand_list():
+    return session.query(Brand).order_by(collate(Brand.name, 'NOCASE'))
+
 def machine_list(id = '', sort = ''):
     return session.query(Machine).order_by(collate(Machine.name, 'NOCASE'))
 

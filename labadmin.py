@@ -13,7 +13,7 @@ session = get_session()
 info = {
     "name"    : "labadmin",
     "version" : commands.getstatusoutput('git describe --abbrev=0 --tags')[1],
-    "areas"   : [ "location", "rack", "machine" ]
+    "areas"   : [ "rack", "machine" ]
 }
 
 @route('/static/:path#.+#', name='static')
@@ -37,11 +37,11 @@ def page(area, view = '', item = ''):
         subprocess.call(["python", "rackview/rackview.py", "labadmin.db"])
         info['rack_list'] = rack_list()
         info['rack_type_model_list'] = rack_type_model_list()
+        info['brand_list'] = brand_list()
 
     if area == "machine":
         if view.startswith('by_'):
             info['sort'] = view[3:]
-
         info['rack_list'] = rack_list()
         info['machine_list'] = machine_list(item, info['sort'])
         info['machine_type_model_list'] = machine_type_model_list()
@@ -49,8 +49,10 @@ def page(area, view = '', item = ''):
     return template(area, info = info)
 
 @route('/<area>', method='POST')
-def page_post(area):
-    if area == "rack":
+@route('/<area>/<view>', method='POST')
+@route('/<area>/<view>/<item>', method='POST')
+def page_post(area, view = '', item = ''):
+    if area == "rack" and view == "":
         new = {}
         for attribute, value in request.forms.allitems():
             if value == "None":
@@ -75,7 +77,38 @@ def page_post(area):
             session.add(Rack(new['name'], new['size'], new['sort'], 1))
             session.commit()
 
-    return page(area)
+    if area == "rack" and view == "brand":
+        new = {}
+        for attribute, value in request.forms.allitems():
+            if value == "None":
+                continue
+
+            item_id = attribute.split('_', 1)[0]
+            column_name = attribute.split('_', 1)[1]
+
+            if column_name == "del":
+                print "db delete, brand id %s" % item_id
+                session.query(Brand).filter_by(id = item_id).delete()
+                session.commit()
+                continue
+
+            if item_id != "new":
+                print "db update, brand id %s: %s = %s" % (item_id, column_name, value)
+
+                session.query(Brand).filter_by(id = item_id).update({column_name: value})
+                session.commit()
+            else:
+                if value:
+                    new[column_name] = value
+                else:
+                    new[column_name] = None
+
+        if new['name']:
+            print "db insert: brand: %s" % new
+            session.add(Brand(new['name']))
+            session.commit()
+
+    return page(area, view, item)
 
 @route('/machine', method='POST')
 def machine_post():
